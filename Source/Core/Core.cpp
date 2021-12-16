@@ -5,8 +5,8 @@
 // provides the EXIT_SUCCESS and EXIT_FAILURE macros
 #include <cstdlib>
 
-#include "VulkanGlobal.h"
-#include "VulkanDivice.h"
+#include "Render/Vulkan/VulkanGlobal.h"
+#include "Render/Vulkan/VulkanDivice.h"
 
 namespace Palette
 {

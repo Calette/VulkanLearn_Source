@@ -5,8 +5,8 @@
 
 namespace Palette
 {
-	RenderMesh::RenderMesh(std::vector<Vertex>& vertexData, std::vector<uint32_t>& indexData, VertexFormat vertexFormat) 
-		: IMesh(vertexData, indexData, vertexFormat)
+	RenderMesh::RenderMesh(VertexRenderData& vertexData, std::vector<uint32_t>& indexData)
+		: IMesh(vertexData, indexData)
 	{
 		_CreateVertexBuffer();
 		_CreateIndexBuffer();
@@ -27,7 +27,7 @@ namespace Palette
 	{
 		// The vertex buffer we have right now works correctly, but the memory type that
 		// allows us to access it from the CPU may not be the most optimal memory type for the graphics card itself to read from.
-		VkDeviceSize bufferSize = sizeof(m_VertexData[0]) * m_VertexData.size();
+		VkDeviceSize bufferSize = sizeof(m_VertexRenderData.m_VertexData[0]) * m_VertexRenderData.m_VertexData.size();
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
@@ -36,7 +36,7 @@ namespace Palette
 
 		void* data;
 		vkMapMemory(PaletteGlobal::device, stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, m_VertexData.data(), (size_t)bufferSize);
+		memcpy(data, m_VertexRenderData.m_VertexData.data(), (size_t)bufferSize);
 		vkUnmapMemory(PaletteGlobal::device, stagingBufferMemory);
 
 		// VK_BUFFER_USAGE_VERTEX_BUFFER_BIT

@@ -32,16 +32,10 @@ namespace Palette
         vkDestroyShaderModule(PaletteGlobal::device, m_PixelShaderModule, nullptr);
     }
 
-    uint32_t VertexPixelShaderModule::Release()
+    void VertexPixelShaderModule::OnRefDestroy()
     {
-        m_RefrenceCount.fetch_sub(1u, std::memory_order_acq_rel);
-        if (m_RefrenceCount == 0u)
-        {
-            vkDestroyShaderModule(PaletteGlobal::device, m_VertShaderModule, nullptr);
-            vkDestroyShaderModule(PaletteGlobal::device, m_PixelShaderModule, nullptr);
-        }
-
-        return m_RefrenceCount;
+        vkDestroyShaderModule(PaletteGlobal::device, m_VertShaderModule, nullptr);
+        vkDestroyShaderModule(PaletteGlobal::device, m_PixelShaderModule, nullptr);
     }
 
     VertexPixelShaderModule::VertexPixelShaderModule(const std::string& path, const std::string& name)
@@ -89,9 +83,9 @@ namespace Palette
         
     }
 
-    uint32_t ComputeShaderModule::Release()
+    void ComputeShaderModule::OnRefDestroy()
     {
-        return 0u;
+
     }
 
     void ComputeShaderModule::_CreatePipelineShaderStage(VkShaderModule* computeShaderModule)
@@ -104,10 +98,10 @@ namespace Palette
 
     Shader::~Shader()
     {
-        for (auto shaderModules : m_ShaderModules)
-        {
-            shaderModules.second;
-        }
+        //for (auto shaderModules : m_ShaderModules)
+        //{
+        //    shaderModules.second;
+        //}
         m_ShaderModules.clear();
     }
 
@@ -160,7 +154,7 @@ namespace Palette
         return defaultShader;
     }
 
-    IShaderModule* Shader::GetShaderModule(uint32_t defineHash)
+    TSharedPtr<IShaderModule> Shader::GetShaderModule(uint32_t defineHash)
     {
         if (m_Type == ShaderType::None)
             return GetDefaultShader()->GetShaderModule(0);
@@ -169,10 +163,12 @@ namespace Palette
 
     void Shader::RealeaseShaderModule(uint32_t defineHash)
     {
-        if (m_ShaderModules[defineHash]->Release() == 0u)
-        {
-            m_ShaderModules.erase(m_ShaderModules.find(defineHash));
-        }
+        m_ShaderModules.erase(m_ShaderModules.find(defineHash));
+    }
+
+    void Shader::RealeaseAllShaderModule()
+    {
+        m_ShaderModules.clear();
     }
 
     void Shader::_ReloadShader(uint32_t newTimeStamp)

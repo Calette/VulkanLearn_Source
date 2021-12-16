@@ -5,7 +5,8 @@
 #include <cstdint>
 #include <unordered_map>
 
-#include "Common/IRefObject.h"
+#include "Common/IRef.h"
+#include "Common/IPtr.h"
 
 namespace Palette
 {
@@ -16,7 +17,7 @@ namespace Palette
 		None
 	};
 
-	class IShaderModule : public ISharedObject
+	class IShaderModule : public IRef
 	{
 	public:
 		std::string GetName() const noexcept { return m_Name; }
@@ -41,7 +42,7 @@ namespace Palette
 
 	public:
 		~VertexPixelShaderModule() override;
-		uint32_t Release();
+		void OnRefDestroy() override;
 		VkPipelineShaderStageCreateInfo* GetShaderStages() override { return m_ShaderStages; }
 
 	protected:
@@ -64,7 +65,7 @@ namespace Palette
 
 	public:
 		VkPipelineShaderStageCreateInfo* GetShaderStages() override { return m_ShaderStages; }
-		uint32_t Release();
+		void OnRefDestroy() override;
 
 	protected:
 		~ComputeShaderModule() override;
@@ -85,7 +86,9 @@ namespace Palette
 
 		static Shader* GetDefaultShader();
 
-		IShaderModule* GetShaderModule(uint32_t defineHash);
+		TSharedPtr<IShaderModule> GetShaderModule(uint32_t defineHash);
+
+		void RealeaseAllShaderModule();
 
 		void RealeaseShaderModule(uint32_t defineHash);
 
@@ -95,7 +98,7 @@ namespace Palette
 	protected:
 		std::string m_Name;
 		// different define
-		std::unordered_map<uint32_t, IShaderModule*> m_ShaderModules;
+		std::unordered_map<uint32_t, TSharedPtr<IShaderModule>> m_ShaderModules;
 
 		static const std::string defualtShaderPath;
 		static Shader* defaultShader;

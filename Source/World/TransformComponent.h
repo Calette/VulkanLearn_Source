@@ -8,7 +8,7 @@ namespace Palette
 	{
 	public:
 		TransformComponent();
-		void Tick_ot();
+		//void Tick_ot();
 
 	protected:
 		Vecter3 position;

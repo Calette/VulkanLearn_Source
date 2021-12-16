@@ -13,8 +13,8 @@ namespace Palette
 	class Camera : public IObject
 	{
 	public:
-		float GetFov() { return m_Fov; };
-		float SetFov(float fov) { m_Fov = fov; };
+		float GetFov() { return m_Fov; }
+		float SetFov(float fov) { m_Fov = fov; }
 
 	protected:
 		float m_Fov;

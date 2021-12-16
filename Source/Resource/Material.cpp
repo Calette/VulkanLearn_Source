@@ -9,53 +9,57 @@ namespace Palette
 
 	using MaterialParameterDictionary = std::unordered_map<std::string, MaterialParameterData>;
 
-	Material* Material::DefualtMat = nullptr;
+	Material MaterialResource::DefualtMat = nullptr;
 
-	Material::Material()
-		: IMaterial()
+	MaterialResource::MaterialResource()
 	{
 
 	}
 
-	Material::~Material()
+	MaterialResource::~MaterialResource()
+	{
+		
+	}
+
+	void MaterialResource::OnRefDestroy()
 	{
 		for (auto shader : m_Shaders)
 		{
-			shader->GetShaderModule(0u)->Release();
+			shader->GetShaderModule(0u)->ReleaseRef();
 		}
 		m_Shaders.clear();
 	}
 
-	Material::Material(Shader* shader)
+	MaterialResource::MaterialResource(Shader* shader)
 		: IMaterial()
 	{
 		m_Shaders.push_back(shader);
-		shader->GetShaderModule(0u)->AddRefrenceCount();
+		shader->GetShaderModule(0u)->AddRef();
 	}
 
-	Material::Material(Material* material)
+	MaterialResource::MaterialResource(MaterialResource* material)
 		: IMaterial()
 	{
 		for (auto shader : material->GetShaders())
 		{
 			m_Shaders.push_back(shader);
-			shader->GetShaderModule(0u)->AddRefrenceCount();
+			shader->GetShaderModule(0u)->AddRef();
 		}
 	}
 
-	Material* Material::GetDefualtMat()
+	Material MaterialResource::GetDefualtMat()
 	{
-		if (DefualtMat == nullptr)
+		if (DefualtMat)
 		{
-			DefualtMat = new Material(Shader::GetDefaultShader());
+			DefualtMat = Material(new MaterialResource(Shader::GetDefaultShader()));
 			// always keep default mat
-			DefualtMat->GetShaders()[0]->GetShaderModule(0u)->AddRefrenceCount();
+			DefualtMat->GetShaders()[0]->GetShaderModule(0u)->AddRef();
 		}
 		return DefualtMat;
 	}
 
-	void Material::ReleaseDefualtMat()
+	void MaterialResource::ReleaseDefualtMat()
 	{
-		delete DefualtMat;
+		//delete DefualtMat;
 	}
 }

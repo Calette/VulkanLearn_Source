@@ -14,12 +14,15 @@ namespace Palette
 
 	struct Vertex
 	{
+
 	};
 
 	struct Vertex_P2_C3 : public Vertex
 	{
 		glm::vec2 pos;
 		glm::vec3 color;
+
+		Vertex_P2_C3(glm::vec2 p, glm::vec3 c) : pos(p), color(c) {}
 
 		static VkVertexInputBindingDescription GetBindingDescription()
 		{

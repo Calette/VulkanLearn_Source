@@ -9,6 +9,6 @@ namespace Palette
 		IComponent();
 		virtual ~IComponent() {}
 
-		virtual void Tick_ot() = 0;
+		virtual void Tick_ot() {};
 	};
 }

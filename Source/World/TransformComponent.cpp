@@ -8,8 +8,8 @@ namespace Palette
 		
 	}
 
-	void TransformComponent::Tick_ot()
-	{
-		
-	}
+	//void TransformComponent::Tick_ot()
+	//{
+	//	
+	//}
 }

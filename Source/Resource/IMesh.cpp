@@ -3,10 +3,9 @@
 
 namespace Palette
 {
-	IMesh::IMesh(std::vector<Vertex>& vertexData, std::vector<uint32_t>& indexData, VertexFormat vertexFormat)
-		: m_VertexData{ vertexData }
+	IMesh::IMesh(VertexRenderData& vertexRenderData, std::vector<uint32_t>& indexData)
+		: m_VertexRenderData{ vertexRenderData }
 		, m_IndexData{ indexData }
-		, m_VertexFormat{ vertexFormat }
 	{
 
 	}

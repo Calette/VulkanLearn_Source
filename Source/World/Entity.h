@@ -13,10 +13,7 @@ namespace Palette
 		Entity();
 		~Entity();
 
-		std::vector<IComponent*>& GetAllComponents()
-		{
-			return m_Components;
-		}
+		std::vector<IComponent*>& GetAllComponents() { return m_Components; }
 
 		void AddComponent(IComponent* component);
 
@@ -49,7 +46,7 @@ namespace Palette
 			return components;
 		}
 
-		const TransformComponent* Transform() { return m_Transform; };
+		const TransformComponent* Transform() { return m_Transform; }
 
 	protected:
 		std::vector<IComponent*> m_Components;

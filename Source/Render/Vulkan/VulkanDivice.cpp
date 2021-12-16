@@ -7,6 +7,7 @@
 #include "Common/DebugTool.h"
 #include "World/Entity.h"
 #include "World/ModelComponent.h"
+#include "Resource/Material.h"
 
 namespace Palette
 {
@@ -31,7 +32,7 @@ namespace Palette
 
     VulkanDevice::~VulkanDevice()
     {
-        Material::ReleaseDefualtMat();
+        MaterialResource::ReleaseDefualtMat();
 
         _CleanupSwapChain();
 
@@ -755,6 +756,7 @@ namespace Palette
 
         //auto entities = world->GetEntityList();
         //auto model = entities[0u]->GetComponent<ModelComponent>();
+        // auto t = model->GetModelRenderer()->GetMaterial();
         Shader* shader = model->GetModelRenderer()->GetMaterial()->GetShaders()[0];
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
@@ -764,7 +766,7 @@ namespace Palette
         VkVertexInputBindingDescription bindingDescription;
         std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions;
 
-        switch (model->GetModelRenderer()->GetMeshes()->GetVertexFormat())
+        switch (model->GetModelRenderer()->GetMeshes()->GetVertexRenderData().m_VertexFormat)
         {
         case VertexFormat::VERTEX_P2_C3:
             bindingDescription = Vertex_P2_C3::GetBindingDescription();

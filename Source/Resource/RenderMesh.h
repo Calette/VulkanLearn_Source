@@ -6,7 +6,7 @@ namespace Palette
 	class RenderMesh : public IMesh
 	{
 	public:
-		RenderMesh(std::vector<Vertex>& vertexData, std::vector<uint32_t>& indexData, VertexFormat vertexFormat);
+		RenderMesh(VertexRenderData& vertexData, std::vector<uint32_t>& indexData);
 		~RenderMesh();
 
 		VkBuffer& GetVertexBuffer() { return m_VertexBuffer; }

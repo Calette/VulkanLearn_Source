@@ -2,26 +2,23 @@
 #include <vector>
 
 #include "Render/VertexInputBindingDescription.h"
+#include "Render/VertexData.h"
 
 namespace Palette
 {
 	class IMesh
 	{
 	public:
-		IMesh(std::vector<Vertex>& vertexData, std::vector<uint32_t>& indexData, VertexFormat vertexFormat);
+		IMesh(VertexRenderData& vertexData, std::vector<uint32_t>& indexData);
 		//~IMesh();
 
-		std::vector<Vertex>& GetVertexData() { return m_VertexData; }
+		VertexRenderData& GetVertexRenderData() { return m_VertexRenderData; }
 		std::vector<uint32_t>& GetIndexData() { return m_IndexData; }
-		void SetVertexData(std::vector<Vertex>& vertexData) { m_VertexData = vertexData; }
+		void SetVertexData(VertexRenderData& vertexData) { m_VertexRenderData = vertexData; }
 		void SetIndexData(std::vector<uint32_t>& indexData) { m_IndexData = indexData; }
 
-		VertexFormat GetVertexFormat() { return m_VertexFormat; }
-
 	protected:
-		std::vector<Vertex> m_VertexData;
 		std::vector<uint32_t> m_IndexData;
-
-		VertexFormat m_VertexFormat;
+		VertexRenderData m_VertexRenderData;
 	};
 }

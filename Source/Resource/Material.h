@@ -1,5 +1,6 @@
 #pragma once
 #include "Shader.h"
+#include "Resourse.h"
 
 namespace Palette
 {
@@ -9,8 +10,12 @@ namespace Palette
 		BLEND_Translucent
 	};
 
-	class IMaterial
+	class IMaterial : public IRef
 	{
+	protected:
+		IMaterial() noexcept = default;
+		~IMaterial() noexcept = default;
+
 	public:
 		std::vector<Shader*>& GetShaders() { return m_Shaders; };
 
@@ -18,25 +23,21 @@ namespace Palette
 		std::vector<Shader*> m_Shaders;
 	};
 
-	class Material : public IMaterial
+	class MaterialResource : public IMaterial
 	{
 	public:
-		Material();
-		~Material();
-		Material(Shader* shader);
-		Material(Material* material);
+		MaterialResource();
+		~MaterialResource();
+		MaterialResource(Shader* shader);
+		MaterialResource(MaterialResource* material);
 
-		static Material* GetDefualtMat();
+		void OnRefDestroy() override;
+
+		static Material GetDefualtMat();
 		static void ReleaseDefualtMat();
 
 	protected:
-		static Material* DefualtMat;
+		static Material DefualtMat;
 		BlendMode m_BlendMode;
-	};
-
-	class SubMaterial : public IMaterial
-	{
-	public:
-		std::vector<IMaterial*> m_Materials;
 	};
 }
