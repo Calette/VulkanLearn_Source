@@ -7,17 +7,12 @@
 
 #include "Common/IRef.h"
 #include "Common/IPtr.h"
+#include "Resourse.h"
+#include "Render/Shader/ShaderDeclaration.h"
 
 namespace Palette
 {
-	enum class ShaderType
-	{
-		VertexPixel,
-		Compute,
-		None
-	};
-
-	class IShaderModule : public IRef
+	class IShaderModuleResourse : public IRef
 	{
 	public:
 		std::string GetName() const noexcept { return m_Name; }
@@ -26,8 +21,8 @@ namespace Palette
 		virtual VkPipelineShaderStageCreateInfo* GetShaderStages() = 0;
 
 	protected:
-		virtual ~IShaderModule() {};
-		IShaderModule(const std::string& path);
+		virtual ~IShaderModuleResourse() {};
+		IShaderModuleResourse(const std::string& path);
 
 		void _CreateShaderModule(VkShaderModule& shaderModule, const std::vector<char>& code);
 
@@ -36,9 +31,9 @@ namespace Palette
 		uint32_t m_PassFlag;
 	};
 
-	class VertexPixelShaderModule : public IShaderModule
+	class VertexPixelShaderModule : public IShaderModuleResourse
 	{
-		friend class Shader;
+		friend class ShaderResource;
 
 	public:
 		~VertexPixelShaderModule() override;
@@ -59,9 +54,9 @@ namespace Palette
 		VkPipelineShaderStageCreateInfo m_ShaderStages[2];
 	};
 
-	class ComputeShaderModule : public IShaderModule
+	class ComputeShaderModule : public IShaderModuleResourse
 	{
-		friend class Shader;
+		friend class ShaderResource;
 
 	public:
 		VkPipelineShaderStageCreateInfo* GetShaderStages() override { return m_ShaderStages; }
@@ -78,15 +73,15 @@ namespace Palette
 		VkPipelineShaderStageCreateInfo* m_ShaderStages = nullptr;
 	};
 
-	class Shader
+	class ShaderResource : public IRef
 	{
 	public:
-		~Shader();
-		Shader(const std::string& path);
+		~ShaderResource();
+		ShaderResource(const std::string& path);
 
-		static Shader* GetDefaultShader();
+		static Shader GetDefaultShader();
 
-		TSharedPtr<IShaderModule> GetShaderModule(uint32_t defineHash);
+		IShaderModule GetShaderModule(uint32_t defineHash);
 
 		void RealeaseAllShaderModule();
 
@@ -97,11 +92,11 @@ namespace Palette
 
 	protected:
 		std::string m_Name;
-		// different define
-		std::unordered_map<uint32_t, TSharedPtr<IShaderModule>> m_ShaderModules;
+		// different define / passFlag
+		std::unordered_map<uint32_t, IShaderModule> m_ShaderModules;
 
-		static const std::string defualtShaderPath;
-		static Shader* defaultShader;
+		static const std::string DEFUALTSHADERPATH;
+		static Shader defaultShader;
 
 		std::string m_SourcePath;
 		ShaderType m_Type;

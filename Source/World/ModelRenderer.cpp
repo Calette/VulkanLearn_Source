@@ -1,4 +1,5 @@
 #include "ModelRenderer.h"
+#include "Render/RenderElement.h"
 
 namespace Palette
 {
@@ -29,7 +30,7 @@ namespace Palette
 
 		VertexRenderData vertexData = { vertexFormat, verticesData, vertices.size() };
 
-		RenderMesh* renderMesh = new RenderMesh(vertexData, indices);
+		RenderMesh renderMesh = RenderMesh(new RenderMeshResourse(vertexData, indices));
 		m_Meshes.push_back(renderMesh);
 	}
 
@@ -40,14 +41,18 @@ namespace Palette
 			mat->GetShaders()[0]->RealeaseShaderModule(0);
 		}
 
-		for (auto mesh : m_Meshes)
-		{
-			delete mesh;
-		}
+		//m_Meshes.clear();
 	}
 
-	void ModelRenderer::_DrawItem_on_rt()
+	void ModelRenderer::_DrawItem_rt()
 	{
-
+		int size = m_Materials.size();
+		if (size == m_Meshes.size())
+		{
+			for (int i = 0; i < size; i++)
+			{
+				DrawMesh(m_Meshes[i], m_Materials[i]);
+			}
+		}
 	}
 }

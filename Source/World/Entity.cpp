@@ -7,8 +7,7 @@ namespace Palette
 {
 	Entity::Entity()
 	{
-		m_Transform = new TransformComponent();
-		AddComponent(m_Transform);
+		m_Transform = AddComponent<TransformComponent>();
 	}
 
 	Entity::~Entity()
@@ -19,11 +18,4 @@ namespace Palette
 		}
 		m_Components.clear();
 	}
-
-	void Entity::AddComponent(IComponent* component)
-	{
-		m_Components.push_back(component);
-		GetComponent<TransformComponent>();
-	}
-
 }

@@ -2,7 +2,8 @@
 
 namespace Palette
 {
-	ModelComponent::ModelComponent()
+	ModelComponent::ModelComponent(IObject* parent)
+		: IPrimitiveComponent(parent)
 	{
 		m_ModelRenderer = new ModelRenderer();
 	}
@@ -13,6 +14,16 @@ namespace Palette
 	}
 
 	void ModelComponent::Tick_ot()
+	{
+
+	}
+
+	void ModelComponent::Pick_ot()
+	{
+
+	}
+
+	void ModelComponent::CollectPrimitive()
 	{
 
 	}

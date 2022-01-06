@@ -17,10 +17,10 @@ namespace Palette
 		~IMaterial() noexcept = default;
 
 	public:
-		std::vector<Shader*>& GetShaders() { return m_Shaders; };
+		std::vector<Shader>& GetShaders() { return m_Shaders; };
 
 	protected:
-		std::vector<Shader*> m_Shaders;
+		std::vector<Shader> m_Shaders;
 	};
 
 	class MaterialResource : public IMaterial
@@ -28,7 +28,7 @@ namespace Palette
 	public:
 		MaterialResource();
 		~MaterialResource();
-		MaterialResource(Shader* shader);
+		MaterialResource(Shader shader);
 		MaterialResource(MaterialResource* material);
 
 		void OnRefDestroy() override;

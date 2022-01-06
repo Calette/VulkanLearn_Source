@@ -2,7 +2,8 @@
 
 namespace Palette
 {
-	IPrimitiveComponent::IPrimitiveComponent()
+	IPrimitiveComponent::IPrimitiveComponent(IObject* parent)
+		: IComponent(parent)
 	{
 		
 	}

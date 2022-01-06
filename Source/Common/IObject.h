@@ -1,20 +1,26 @@
 #pragma once
+#include <iostream>
 #include <string>
+#include "Guid.h"
 
 namespace Palette
 {
 	class IObject
 	{
 	public:
-		IObject() : m_ObjectID(0u) {};
+		IObject()
+		{
+			uuid4_generate(m_Guid);
+		}
+		virtual ~IObject() {};
 
 		std::string GetName() const noexcept { return m_Name; }
 
-		uint32_t GetObjectID() const noexcept { return m_ObjectID; }
+		char* GetGuid() noexcept { return m_Guid; }
 
 	protected:
 		std::string m_Name;
 
-		uint32_t m_ObjectID;
+		char m_Guid[UUID_LEN];
 	};
 }

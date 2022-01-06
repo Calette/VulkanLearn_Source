@@ -2,8 +2,9 @@
 
 namespace Palette
 {
-	TransformComponent::TransformComponent()
-		:position(Vecter3::Zero)
+	TransformComponent::TransformComponent(IObject* parent)
+		: IComponent(parent)
+		, position(Vecter3::Zero)
 	{
 		
 	}

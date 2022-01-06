@@ -91,8 +91,15 @@ namespace Palette
         std::vector<VkFramebuffer> swapChainFramebuffers;
 
         VkRenderPass renderPass;
+        VkDescriptorSetLayout descriptorSetLayout;
         VkPipelineLayout pipelineLayout;
         VkPipeline graphicsPipeline;
+
+        VkBuffer indexBuffer;
+        VkDeviceMemory indexBufferMemory;
+
+        std::vector<VkBuffer> uniformBuffers;
+        std::vector<VkDeviceMemory> uniformBuffersMemory;
 
         std::vector<VkCommandBuffer> commandBuffers;
 

@@ -7,9 +7,10 @@ namespace Palette
 	class IPrimitiveComponent : public IComponent
 	{
 	public:
-		IPrimitiveComponent();
+		IPrimitiveComponent(IObject* parent = nullptr);
 		~IPrimitiveComponent();
 
-		void CollectPrimitive();
+		virtual void CollectPrimitive() = 0;
+		virtual void Pick_ot() {}
 	};
 }

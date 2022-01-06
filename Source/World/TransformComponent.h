@@ -7,7 +7,7 @@ namespace Palette
 	class TransformComponent : public IComponent
 	{
 	public:
-		TransformComponent();
+		TransformComponent(IObject* parent = nullptr);
 		//void Tick_ot();
 
 	protected:

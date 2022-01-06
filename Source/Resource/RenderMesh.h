@@ -3,11 +3,11 @@
 
 namespace Palette
 {
-	class RenderMesh : public IMesh
+	class RenderMeshResourse : public IMesh
 	{
 	public:
-		RenderMesh(VertexRenderData& vertexData, std::vector<uint32_t>& indexData);
-		~RenderMesh();
+		RenderMeshResourse(VertexRenderData& vertexData, std::vector<uint32_t>& indexData);
+		~RenderMeshResourse();
 
 		VkBuffer& GetVertexBuffer() { return m_VertexBuffer; }
 		VkDeviceMemory& GetVertexBufferMemory() { return m_VertexBufferMemory; }

@@ -4,6 +4,7 @@ namespace Palette
 {
 	class IRenderElement
 	{
-		virtual void _DrawItem_on_rt() = 0;
+	public:
+		virtual void _DrawItem_rt() = 0;
 	};
 }

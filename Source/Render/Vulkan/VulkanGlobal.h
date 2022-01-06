@@ -16,8 +16,8 @@ namespace PaletteGlobal
 	const uint32_t WIDTH = 800;
 	const uint32_t HEIGHT = 600;
 
-	extern const std::string projectPath;
-	extern const std::string shaderPath;
+	extern const std::string PROJECTPATH;
+	extern const std::string SHADERPATH;
 
 	extern VkDevice device;
 	extern VkPhysicalDevice physicalDevice;

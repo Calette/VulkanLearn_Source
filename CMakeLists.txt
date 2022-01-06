@@ -3,25 +3,30 @@ cmake_minimum_required(VERSION 3.20)
 project(VulkanLearn)
 
 #Message(STATUS "Processing Project ${PROJNAME}:")
+message(WARNING "注意：需要手动设置 Working Directory 为原目录")
 
 # Property
 set(CMAKE_CXX_STANDARD 17)
+#需要手动设置woking directory，下面方法试了都没用
 #set(PWD "${CMAKE_CURRENT_LIST_DIR}")
 #set_property(TARGET MyTarget PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
 #set_target_properties(${PROJECT_BIN} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
-
-# Configure Setting
-set(VULKANSDK_PATH ${PROJECT_SOURCE_DIR} CACHE PATH "Directory where outputs will be stored")
 
 # Common
 include_directories(${PROJECT_SOURCE_DIR}/Include)
 include_directories(${PROJECT_SOURCE_DIR}/Source)
 
 # Vulkan
-set(LIBS ${LIBS} vulkan-1)
-set(LINK_DIR ${VULKANSDK_PATH}/Lib)
+find_package(Vulkan)
+message(STATUS "Found Vulkan in ${Vulkan_INCLUDE_DIRS}")
+message(STATUS "Found Vulkan libs in ${Vulkan_LIBRARIES}")
+# Configure Setting
+#set(VULKANSDK_PATH ${PROJECT_SOURCE_DIR} CACHE PATH "Directory where outputs will be stored")
+#在最后使用Vulkan_LIBRARIES直接设置lib
+#set(LIBS ${LIBS} vulkan-1)
+#set(LINK_DIR ${VULKANSDK_PATH}/Lib)
 link_directories(${LINK_DIR})
-include_directories(${VULKANSDK_PATH}/Include)
+include_directories(${Vulkan_INCLUDE_DIRS})
 
 # GLFW
 set(LIBS ${LIBS} glfw3)
@@ -53,4 +58,6 @@ set(all_files ${project_headers} ${project_cpps})
 source_group_by_dir(all_files)
 set(TARGET ${CMAKE_PROJECT_NAME})
 add_executable(${TARGET} ${all_files})
+
 target_link_libraries(${TARGET} ${LIBS})
+target_link_libraries(${TARGET} ${Vulkan_LIBRARIES})

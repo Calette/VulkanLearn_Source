@@ -2,15 +2,20 @@
 #include <algorithm>
 #include <set>
 
-#include "VulkanDivice.h"
+#include "VulkanDevice.h"
 #include "VulkanGlobal.h"
 #include "Common/DebugTool.h"
 #include "World/Entity.h"
 #include "World/ModelComponent.h"
-#include "Resource/Material.h"
 
 namespace Palette
 {
+    using PaletteGlobal::instance;
+    using PaletteGlobal::device;
+    using PaletteGlobal::commandPool;
+    using PaletteGlobal::graphicsQueue;
+    using PaletteGlobal::physicalDevice;
+
     VulkanDevice::VulkanDevice(GLFWwindow* window)
     {
         _CreateInstance();
@@ -36,58 +41,60 @@ namespace Palette
 
         _CleanupSwapChain();
 
+        vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) 
         {
-            vkDestroySemaphore(PaletteGlobal::device, renderFinishedSemaphores[i], nullptr);
-            vkDestroySemaphore(PaletteGlobal::device, imageAvailableSemaphores[i], nullptr);
-            vkDestroyFence(PaletteGlobal::device, inFlightFences[i], nullptr);
+            vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(device, inFlightFences[i], nullptr);
         }
 
-        vkDestroyCommandPool(PaletteGlobal::device, PaletteGlobal::commandPool, nullptr);
+        vkDestroyCommandPool(device, commandPool, nullptr);
 
-        vkDestroyDevice(PaletteGlobal::device, nullptr);
+        vkDestroyDevice(device, nullptr);
 
         if (PaletteGlobal::enableValidationLayers)
         {
-            DestroyDebugUtilsMessengerEXT(PaletteGlobal::instance, debugMessenger, nullptr);
+            DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
         }
 
-        vkDestroySurfaceKHR(PaletteGlobal::instance, surface, nullptr);
-        vkDestroyInstance(PaletteGlobal::instance, nullptr);
+        vkDestroySurfaceKHR(instance, surface, nullptr);
+        vkDestroyInstance(instance, nullptr);
     }
 
     void VulkanDevice::_CleanupSwapChain() 
     {
         for (auto framebuffer : swapChainFramebuffers) 
         {
-            vkDestroyFramebuffer(PaletteGlobal::device, framebuffer, nullptr);
+            vkDestroyFramebuffer(device, framebuffer, nullptr);
         }
 
-        vkFreeCommandBuffers(PaletteGlobal::device, PaletteGlobal::commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+        vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
 
-        vkDestroyPipeline(PaletteGlobal::device, graphicsPipeline, nullptr);
-        vkDestroyPipelineLayout(PaletteGlobal::device, pipelineLayout, nullptr);
-        vkDestroyRenderPass(PaletteGlobal::device, renderPass, nullptr);
+        vkDestroyPipeline(device, graphicsPipeline, nullptr);
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        vkDestroyRenderPass(device, renderPass, nullptr);
 
         for (auto imageView : swapChainImageViews) 
         {
-            vkDestroyImageView(PaletteGlobal::device, imageView, nullptr);
+            vkDestroyImageView(device, imageView, nullptr);
         }
 
-        vkDestroySwapchainKHR(PaletteGlobal::device, swapChain, nullptr);
+        vkDestroySwapchainKHR(device, swapChain, nullptr);
     }
 
     void VulkanDevice::DrawFrame()
     {
-        vkWaitForFences(PaletteGlobal::device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+        vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
-        vkAcquireNextImageKHR(PaletteGlobal::device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+        vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
         // Check if a previous frame is using this image (i.e. there is its fence to wait on)
         if (imagesInFlight[imageIndex] != VK_NULL_HANDLE) 
         {
-            vkWaitForFences(PaletteGlobal::device, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+            vkWaitForFences(device, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
         }
         // Mark the image as now being in use by this frame
         imagesInFlight[imageIndex] = inFlightFences[currentFrame];
@@ -108,9 +115,9 @@ namespace Palette
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        vkResetFences(PaletteGlobal::device, 1, &inFlightFences[currentFrame]);
+        vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
-        if (vkQueueSubmit(PaletteGlobal::graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+        if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to submit draw command buffer!");
         }
@@ -181,7 +188,7 @@ namespace Palette
             createInfo.pNext = nullptr;
         }
 
-        if (vkCreateInstance(&createInfo, nullptr, &PaletteGlobal::instance) != VK_SUCCESS)
+        if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create instance!");
         }
@@ -249,7 +256,7 @@ namespace Palette
 
     void VulkanDevice::_CreateSurface(GLFWwindow* window)
     {
-        if (glfwCreateWindowSurface(PaletteGlobal::instance, window, nullptr, &surface) != VK_SUCCESS)
+        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create window surface!");
         }
@@ -258,7 +265,7 @@ namespace Palette
     void VulkanDevice::_PickPhysicalDevice()
     {
         uint32_t deviceCount = 0;
-        vkEnumeratePhysicalDevices(PaletteGlobal::instance, &deviceCount, nullptr);
+        vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
         if (deviceCount == 0)
         {
@@ -266,7 +273,7 @@ namespace Palette
         }
 
         std::vector<VkPhysicalDevice> devices(deviceCount);
-        vkEnumeratePhysicalDevices(PaletteGlobal::instance, &deviceCount, devices.data());
+        vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
         for (const auto& device : devices)
         {
@@ -277,7 +284,7 @@ namespace Palette
             }
         }
 
-        if (PaletteGlobal::physicalDevice == VK_NULL_HANDLE)
+        if (physicalDevice == VK_NULL_HANDLE)
         {
             throw std::runtime_error("failed to find a suitable GPU!");
         }
@@ -285,16 +292,16 @@ namespace Palette
         // Use an ordered map to automatically sort candidates by increasing score
         //std::multimap<int, VkPhysicalDevice> candidates;
 
-        //for (const auto& PaletteGlobal::device : devices) 
+        //for (const auto& device : devices) 
         //{
-        //    int score = rateDeviceSuitability(PaletteGlobal::device);
-        //    candidates.insert(std::make_pair(score, PaletteGlobal::device));
+        //    int score = rateDeviceSuitability(device);
+        //    candidates.insert(std::make_pair(score, device));
         //}
 
         //// Check if the best candidate is suitable at all
         //if (candidates.rbegin()->first > 0) 
         //{
-        //    PaletteGlobal::physicalDevice = candidates.rbegin()->second;
+        //    physicalDevice = candidates.rbegin()->second;
         //}
         //else 
         //{
@@ -402,7 +409,7 @@ namespace Palette
 
     void VulkanDevice::_CreateLogicalDevice()
     {
-        QueueFamilyIndices indices = _FindQueueFamilies(PaletteGlobal::physicalDevice);
+        QueueFamilyIndices indices = _FindQueueFamilies(physicalDevice);
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
         std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
@@ -440,18 +447,18 @@ namespace Palette
             createInfo.enabledLayerCount = 0;
         }
 
-        if (vkCreateDevice(PaletteGlobal::physicalDevice, &createInfo, nullptr, &PaletteGlobal::device) != VK_SUCCESS)
+        if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create logical device!");
         }
 
-        vkGetDeviceQueue(PaletteGlobal::device, indices.graphicsFamily.value(), 0, &PaletteGlobal::graphicsQueue);
-        vkGetDeviceQueue(PaletteGlobal::device, indices.presentFamily.value(), 0, &presentQueue);
+        vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+        vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
     }
 
     void VulkanDevice::_CreateSwapChain(GLFWwindow* window)
     {
-        SwapChainSupportDetails swapChainSupport = _QuerySwapChainSupport(PaletteGlobal::physicalDevice);
+        SwapChainSupportDetails swapChainSupport = _QuerySwapChainSupport(physicalDevice);
 
         VkSurfaceFormatKHR surfaceFormat = _ChooseSwapSurfaceFormat(swapChainSupport.formats);
         VkPresentModeKHR presentMode = _ChooseSwapPresentMode(swapChainSupport.presentModes);
@@ -477,7 +484,7 @@ namespace Palette
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        QueueFamilyIndices indices = _FindQueueFamilies(PaletteGlobal::physicalDevice);
+        QueueFamilyIndices indices = _FindQueueFamilies(physicalDevice);
         uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
         if (indices.graphicsFamily != indices.presentFamily)
@@ -505,14 +512,14 @@ namespace Palette
         // it's possible that your swap chain becomes invalid or unoptimized while your application is running, for example because the window was resized
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        if (vkCreateSwapchainKHR(PaletteGlobal::device, &createInfo, nullptr, &swapChain) != VK_SUCCESS)
+        if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create swap chain!");
         }
 
-        vkGetSwapchainImagesKHR(PaletteGlobal::device, swapChain, &imageCount, nullptr);
+        vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
         swapChainImages.resize(imageCount);
-        vkGetSwapchainImagesKHR(PaletteGlobal::device, swapChain, &imageCount, swapChainImages.data());
+        vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data());
 
         swapChainImageFormat = surfaceFormat.format;
         swapChainExtent = extent;
@@ -625,7 +632,7 @@ namespace Palette
             createInfo.subresourceRange.baseArrayLayer = 0;
             createInfo.subresourceRange.layerCount = 1;
 
-            if (vkCreateImageView(PaletteGlobal::device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
+            if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
             {
                 throw std::runtime_error("failed to create image views!");
             }
@@ -670,7 +677,7 @@ namespace Palette
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies = &dependency;
 
-        if (vkCreateRenderPass(PaletteGlobal::device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) 
+        if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) 
         {
             throw std::runtime_error("failed to create render pass!");
         }
@@ -682,6 +689,18 @@ namespace Palette
         uboLayoutBinding.binding = 0;
         uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         uboLayoutBinding.descriptorCount = 1;
+        uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+
+        VkDescriptorSetLayoutCreateInfo layoutInfo{};
+        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo.bindingCount = 1;
+        layoutInfo.pBindings = &uboLayoutBinding;
+
+        if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create descriptor set layout!");
+        }
     }
 
     void VulkanDevice::_CreateGraphicsPipeline()
@@ -740,24 +759,20 @@ namespace Palette
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = 0;
+        pipelineLayoutInfo.setLayoutCount = 1;
+        pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
         pipelineLayoutInfo.pushConstantRangeCount = 0;
 
-        if (vkCreatePipelineLayout(PaletteGlobal::device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) 
+        if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) 
         {
             throw std::runtime_error("failed to create pipeline layout!");
         }
 
         // temp
         Entity* entity = new Entity();
-        entity->AddComponent(new ModelComponent());
-        ModelComponent* model = entity->GetComponent<ModelComponent>();
+        ModelComponent* model = entity->AddComponent<ModelComponent>();
         PaletteGlobal::world->AddEntity(entity);
-
-        //auto entities = world->GetEntityList();
-        //auto model = entities[0u]->GetComponent<ModelComponent>();
-        // auto t = model->GetModelRenderer()->GetMaterial();
-        Shader* shader = model->GetModelRenderer()->GetMaterial()->GetShaders()[0];
+        Shader shader = model->GetModelRenderer()->GetMaterial()->GetShaders()[0];
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
@@ -806,7 +821,7 @@ namespace Palette
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
         //pipelineInfo.basePipelineIndex = -1; // Optional
 
-        if (vkCreateGraphicsPipelines(PaletteGlobal::device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) 
+        if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) 
         {
             throw std::runtime_error("failed to create graphics pipeline!");
         }
@@ -832,7 +847,7 @@ namespace Palette
             framebufferInfo.height = swapChainExtent.height;
             framebufferInfo.layers = 1;
 
-            if (vkCreateFramebuffer(PaletteGlobal::device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) 
+            if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) 
             {
                 throw std::runtime_error("failed to create framebuffer!");
             }
@@ -841,14 +856,14 @@ namespace Palette
 
     void VulkanDevice::_CreateCommandPool()
     {
-        QueueFamilyIndices queueFamilyIndices = _FindQueueFamilies(PaletteGlobal::physicalDevice);
+        QueueFamilyIndices queueFamilyIndices = _FindQueueFamilies(physicalDevice);
 
         VkCommandPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
         poolInfo.flags = 0; // Optional
 
-        if (vkCreateCommandPool(PaletteGlobal::device, &poolInfo, nullptr, &PaletteGlobal::commandPool) != VK_SUCCESS)
+        if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create command pool!");
         }
@@ -860,11 +875,11 @@ namespace Palette
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = PaletteGlobal::commandPool;
+        allocInfo.commandPool = commandPool;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
-        if (vkAllocateCommandBuffers(PaletteGlobal::device, &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
+        if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
         {
             throw std::runtime_error("failed to allocate command buffers!");
         }
@@ -896,8 +911,12 @@ namespace Palette
 
             vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
-            auto entity = PaletteGlobal::world->GetEntityList()[0u];
-            auto mesh = entity->GetComponent<ModelComponent>()->GetModelRenderer()->GetAllMeshes()[0];
+            RenderMesh mesh;
+            for (auto entity : PaletteGlobal::world->GetEntityList())
+            {
+                mesh = entity.second->GetComponent<ModelComponent>()->GetModelRenderer()->GetAllMeshes()[0];
+            }
+            
             VkBuffer vertexBuffers[] = { mesh->GetVertexBuffer() };
             VkBuffer indexBuffer = mesh->GetIndexBuffer();
             VkDeviceSize offsets[] = { 0 };
@@ -937,9 +956,9 @@ namespace Palette
         // and another one to signal that rendering has finished and presentation can happen
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) 
         {
-            if (vkCreateSemaphore(PaletteGlobal::device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-                vkCreateSemaphore(PaletteGlobal::device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-                vkCreateFence(PaletteGlobal::device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
+            if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+                vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+                vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
             {
                 throw std::runtime_error("failed to create semaphores for a frame!");
             }

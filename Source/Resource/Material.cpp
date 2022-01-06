@@ -23,18 +23,13 @@ namespace Palette
 
 	void MaterialResource::OnRefDestroy()
 	{
-		for (auto shader : m_Shaders)
-		{
-			shader->GetShaderModule(0u)->ReleaseRef();
-		}
 		m_Shaders.clear();
 	}
 
-	MaterialResource::MaterialResource(Shader* shader)
+	MaterialResource::MaterialResource(Shader shader)
 		: IMaterial()
 	{
 		m_Shaders.push_back(shader);
-		shader->GetShaderModule(0u)->AddRef();
 	}
 
 	MaterialResource::MaterialResource(MaterialResource* material)
@@ -43,23 +38,22 @@ namespace Palette
 		for (auto shader : material->GetShaders())
 		{
 			m_Shaders.push_back(shader);
-			shader->GetShaderModule(0u)->AddRef();
 		}
 	}
 
 	Material MaterialResource::GetDefualtMat()
 	{
-		if (DefualtMat)
+		if (!DefualtMat)
 		{
-			DefualtMat = Material(new MaterialResource(Shader::GetDefaultShader()));
+			DefualtMat = Material(new MaterialResource(ShaderResource::GetDefaultShader()));
 			// always keep default mat
-			DefualtMat->GetShaders()[0]->GetShaderModule(0u)->AddRef();
+			//DefualtMat->AddRef();
 		}
 		return DefualtMat;
 	}
 
 	void MaterialResource::ReleaseDefualtMat()
 	{
-		//delete DefualtMat;
+		DefualtMat->ReleaseRef();
 	}
 }

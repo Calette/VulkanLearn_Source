@@ -3,8 +3,8 @@
 
 namespace PaletteGlobal
 {
-	const std::string projectPath = _getcwd(NULL, 0);
-	const std::string shaderPath = projectPath + "/Shaders/";
+	const std::string PROJECTPATH = _getcwd(NULL, 0);
+	const std::string SHADERPATH = PROJECTPATH + "/Shaders/";
 
 	VkInstance instance = VK_NULL_HANDLE;
 	VkDevice device = VK_NULL_HANDLE;

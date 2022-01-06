@@ -6,7 +6,8 @@
 #include <cstdlib>
 
 #include "Render/Vulkan/VulkanGlobal.h"
-#include "Render/Vulkan/VulkanDivice.h"
+#include "Render/Vulkan/VulkanDevice.h"
+#include "Common/Guid.h"
 
 namespace Palette
 {
@@ -43,19 +44,17 @@ namespace Palette
 
         void _InitWorld()
         {
+            uuid4_init();
+
             PaletteGlobal::world = new World();
             PaletteGlobal::world->Initialize();
         }
 
         void _Tick_ot()
         {
-            for (auto entity : PaletteGlobal::world->GetEntityList())
-            {
-                for (auto comp : entity.second->GetAllComponents())
-                {
-                    comp->Tick_ot();
-                }
-            }
+            PaletteGlobal::world->Tick_ot();
+
+
         }
 
         void _Render_rt()

@@ -16,6 +16,9 @@ namespace Palette
 		float GetFov() { return m_Fov; }
 		float SetFov(float fov) { m_Fov = fov; }
 
+	public:
+		static Camera* MainCamera;
+
 	protected:
 		float m_Fov;
 

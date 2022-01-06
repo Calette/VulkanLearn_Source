@@ -7,11 +7,13 @@ namespace Palette
 	class ModelComponent : public IPrimitiveComponent
 	{
 	public:
-		ModelComponent();
+		ModelComponent(IObject* parent = nullptr);
 		~ModelComponent();
 
 		ModelRenderer* GetModelRenderer() { return m_ModelRenderer; }
 		void Tick_ot();
+		void Pick_ot() override;
+		void CollectPrimitive() override;
 
 	protected:
 		ModelRenderer* m_ModelRenderer;

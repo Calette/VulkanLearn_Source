@@ -1,18 +1,18 @@
 #include "RenderMesh.h"
 #include "Render/Vulkan/VulkanGlobal.h"
-#include "Render/Vulkan/VulkanDivice.h"
+#include "Render/Vulkan/VulkanDevice.h"
 #include "Render/Vulkan/VulkanUtilities.h"
 
 namespace Palette
 {
-	RenderMesh::RenderMesh(VertexRenderData& vertexData, std::vector<uint32_t>& indexData)
+	RenderMeshResourse::RenderMeshResourse(VertexRenderData& vertexData, std::vector<uint32_t>& indexData)
 		: IMesh(vertexData, indexData)
 	{
 		_CreateVertexBuffer();
 		_CreateIndexBuffer();
 	}
 
-	RenderMesh::~RenderMesh()
+	RenderMeshResourse::~RenderMeshResourse()
 	{
 		// Memory that is bound to a buffer object may be freed once the buffer is no longer used, 
 		// so we shall free it after the buffer has been destroyed
@@ -23,7 +23,7 @@ namespace Palette
 		vkFreeMemory(PaletteGlobal::device, m_IndexBufferMemory, nullptr);
 	}
 
-	void RenderMesh::_CreateVertexBuffer()
+	void RenderMeshResourse::_CreateVertexBuffer()
 	{
 		// The vertex buffer we have right now works correctly, but the memory type that
 		// allows us to access it from the CPU may not be the most optimal memory type for the graphics card itself to read from.
@@ -49,7 +49,7 @@ namespace Palette
 		vkFreeMemory(PaletteGlobal::device, stagingBufferMemory, nullptr);
 	}
 
-	void RenderMesh::_CreateIndexBuffer() 
+	void RenderMeshResourse::_CreateIndexBuffer() 
 	{
 		VkDeviceSize bufferSize = sizeof(m_IndexData[0]) * m_IndexData.size();
 

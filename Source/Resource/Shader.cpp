@@ -2,18 +2,19 @@
 
 #include "Shader.h"
 #include "../Common/FileSystem.h"
+#include "../Common/MD5.h"
 #include "../Render/Vulkan/VulkanGlobal.h"
 #include "fmt/printf.h"
-#include "../Render/VertexInputBindingDescription.h"
+#include "../Render/Mesh/VertexInputBindingDescription.h"
 
 namespace Palette
 {
-    IShaderModule::IShaderModule(const std::string& path) 
+    IShaderModuleResourse::IShaderModuleResourse(const std::string& path) 
     {
 
     }
 
-    void IShaderModule::_CreateShaderModule(VkShaderModule& shaderModule, const std::vector<char>& code)
+    void IShaderModuleResourse::_CreateShaderModule(VkShaderModule& shaderModule, const std::vector<char>& code)
     {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -39,12 +40,12 @@ namespace Palette
     }
 
     VertexPixelShaderModule::VertexPixelShaderModule(const std::string& path, const std::string& name)
-        : IShaderModule(path)
+        : IShaderModuleResourse(path)
     {
         //...×ª³ÉSpir_v
 
-        //m_Vert_SPIR_V_Path = shaderPath + "SPIR-V/" + name + "_vert.spv";
-        //m_Pixel_SPIR_V_Path = shaderPath + "SPIR-V/" + name + "_pixel.spv";
+        //m_Vert_SPIR_V_Path = SHADERPATH + "SPIR-V/" + name + "_vert.spv";
+        //m_Pixel_SPIR_V_Path = SHADERPATH + "SPIR-V/" + name + "_pixel.spv";
         m_Vert_SPIR_V_Path = "Shaders/SPIR-V/" + name + "_vert.spv";
         m_Pixel_SPIR_V_Path = "Shaders/SPIR-V/" + name + "_pixel.spv";
 
@@ -78,7 +79,7 @@ namespace Palette
     }
 
     ComputeShaderModule::ComputeShaderModule(const std::string& path, const std::string& name)
-        : IShaderModule(path)
+        : IShaderModuleResourse(path)
     {
         
     }
@@ -93,19 +94,15 @@ namespace Palette
         
     }
 
-    const std::string Shader::defualtShaderPath = "triangle.shader";
-    Shader* Shader::defaultShader = nullptr;
+    const std::string ShaderResource::DEFUALTSHADERPATH = "triangle.shader";
+    Shader ShaderResource::defaultShader = nullptr;
 
-    Shader::~Shader()
+    ShaderResource::~ShaderResource()
     {
-        //for (auto shaderModules : m_ShaderModules)
-        //{
-        //    shaderModules.second;
-        //}
         m_ShaderModules.clear();
     }
 
-    Shader::Shader(const std::string& path)
+    ShaderResource::ShaderResource(const std::string& path)
         : m_SourcePath(path)
     {
         size_t namePos = path.find_last_of('/');
@@ -113,17 +110,19 @@ namespace Palette
 
         m_Name = path.substr(namePos + 1, extPos);
         std::string ext = path.substr(extPos + 1);
+
         if (ext.compare("shader") == 0)
         {
             m_Type = ShaderType::VertexPixel;
             try
             {
-                IShaderModule* shaderModule = new VertexPixelShaderModule(path, m_Name);
+                IShaderModule shaderModule = IShaderModule(new VertexPixelShaderModule(path, m_Name));
                 m_ShaderModules.emplace(0u, shaderModule);
             }
             catch (const std::exception&)
             {
                 m_Type = ShaderType::None;
+                printf("can not find the shader file : s% : ", m_Name.c_str());
             }
         }
         else if (ext.compare("compute") == 0)
@@ -131,12 +130,13 @@ namespace Palette
             m_Type = ShaderType::Compute;
             try
             {
-                IShaderModule* shaderModule = new ComputeShaderModule(path, m_Name);
+                IShaderModule shaderModule = IShaderModule(new ComputeShaderModule(path, m_Name));
                 m_ShaderModules.emplace(0u, shaderModule);
             }
             catch (const std::exception&)
             {
                 m_Type = ShaderType::None;
+                printf("can not find the shader file : s% : ", m_Name.c_str());
             }
         }
         else
@@ -145,33 +145,34 @@ namespace Palette
         }
     }
 
-    Shader* Shader::GetDefaultShader()
+    Shader ShaderResource::GetDefaultShader()
     {
-        if (defaultShader == nullptr)
+        if (!defaultShader)
         {
-            defaultShader = new Shader(defualtShaderPath);
+            defaultShader = Shader(new ShaderResource(DEFUALTSHADERPATH));
         }
         return defaultShader;
     }
 
-    TSharedPtr<IShaderModule> Shader::GetShaderModule(uint32_t defineHash)
+    IShaderModule ShaderResource::GetShaderModule(uint32_t defineHash)
     {
+        // if defaultShader fails to load, here will be a infinite loop
         if (m_Type == ShaderType::None)
             return GetDefaultShader()->GetShaderModule(0);
         return m_ShaderModules[defineHash];
     }
 
-    void Shader::RealeaseShaderModule(uint32_t defineHash)
+    void ShaderResource::RealeaseShaderModule(uint32_t defineHash)
     {
         m_ShaderModules.erase(m_ShaderModules.find(defineHash));
     }
 
-    void Shader::RealeaseAllShaderModule()
+    void ShaderResource::RealeaseAllShaderModule()
     {
         m_ShaderModules.clear();
     }
 
-    void Shader::_ReloadShader(uint32_t newTimeStamp)
+    void ShaderResource::_ReloadShader(uint32_t newTimeStamp)
     {
         if (newTimeStamp == m_TimeStamp)
             return;

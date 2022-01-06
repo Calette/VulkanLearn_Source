@@ -1,8 +1,8 @@
 #pragma once
 #include <vector>
-#include <iostream>
 
 #include "Common/IObject.h"
+#include "IComponent.h"
 #include "World/TransformComponent.h"
 
 namespace Palette
@@ -15,7 +15,12 @@ namespace Palette
 
 		std::vector<IComponent*>& GetAllComponents() { return m_Components; }
 
-		void AddComponent(IComponent* component);
+		template <typename T> T* AddComponent()
+		{
+			T* component = new T(this);
+			m_Components.push_back(component);
+			return component;
+		}
 
 		template <typename T> T* GetComponent()
 		{
