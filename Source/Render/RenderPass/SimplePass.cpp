@@ -8,9 +8,4 @@ namespace Palette
 		AddIfInputNode(pass);
 		return this;
 	}
-
-	//void SimplePass::Render_rt()
-	//{
-
-	//}
 }

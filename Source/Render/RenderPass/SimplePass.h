@@ -10,7 +10,5 @@ namespace Palette
 		~SimplePass() {}
 
 		IRenderPass* Connect(IRenderPass* pass, RenderScene* scene);
-
-		//void Render_rt() override;
 	};
 }

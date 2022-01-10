@@ -7,11 +7,13 @@ namespace Palette
 	{
 		m_Passes.clear();
 
+		pass->SetEffective();
 		m_Passes.emplace_front(pass);
 		auto preNodes = pass->GetInputNodes();
 		while (preNodes.size() != 0)
 		{
 			pass = pass->GetInputNodes()[0];
+			pass->SetEffective();
 			m_Passes.emplace_front(pass);
 			auto preNodes = pass->GetInputNodes();
 		}
@@ -23,7 +25,8 @@ namespace Palette
 
 		for (IRenderPass* pass : m_Passes)
 		{
-			_RenderPass_rt(pass, cmd);
+			if(pass->IsEffective())
+				_RenderPass_rt(pass, cmd);
 		}
 	}
 

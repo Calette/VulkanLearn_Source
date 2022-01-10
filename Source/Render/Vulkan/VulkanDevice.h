@@ -46,7 +46,7 @@ namespace Palette
         ~VulkanDevice();
 
         void PreRender_rt();
-        void DrawFrame();
+        void DrawFrame_rt();
         void PostRender_rt();
 
         VkCommandBuffer& GetCommandBuffer();
@@ -98,13 +98,13 @@ namespace Palette
         std::vector<VkImageView> swapChainImageViews;
         std::vector<VkFramebuffer> swapChainFramebuffers;
 
-        VkRenderPass renderPass;
-        VkDescriptorSetLayout descriptorSetLayout;
-        VkPipelineLayout pipelineLayout;
-        VkPipeline graphicsPipeline;
+        //VkRenderPass renderPass;
+        //VkDescriptorSetLayout descriptorSetLayout;
+        //VkPipelineLayout pipelineLayout;
+        //VkPipeline graphicsPipeline;
 
-        VkBuffer indexBuffer;
-        VkDeviceMemory indexBufferMemory;
+        //VkBuffer indexBuffer;
+        //VkDeviceMemory indexBufferMemory;
 
         std::vector<VkBuffer> uniformBuffers;
         std::vector<VkDeviceMemory> uniformBuffersMemory;

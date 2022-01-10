@@ -25,9 +25,9 @@ namespace Palette
         _CreateLogicalDevice();
         _CreateSwapChain(window);
         _CreateImageViews();
-        //_CreateRenderPass();
         // in advance
         _CreateCommandPool();
+        //_CreateRenderPass();
         //_CreateDescriptorSetLayout();
         //_CreateGraphicsPipeline();
         //_CreateFramebuffers();
@@ -65,10 +65,11 @@ namespace Palette
 
     void VulkanDevice::PreRender_rt()
     {
-        if(PaletteGlobal::frameCount != 0)
+        if (PaletteGlobal::frameCount != 0)
+        {
             vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-
-        vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+            vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+        }
 
         if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS)
         {
@@ -84,7 +85,7 @@ namespace Palette
         }
     }
 
-    void VulkanDevice::DrawFrame()
+    void VulkanDevice::DrawFrame_rt()
     {
         // Check if a previous frame is using this image (i.e. there is its fence to wait on)
         if (imagesInFlight[imageIndex] != VK_NULL_HANDLE) 

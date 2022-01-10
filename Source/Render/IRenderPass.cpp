@@ -240,7 +240,7 @@ namespace Palette
 		}
 		m_Elements.clear();
 
-        //m_Effective = false;
+        m_Effective = false;
         m_FinalOutput = false;
 	}
 

@@ -61,7 +61,7 @@ namespace Palette
             PaletteGlobal::vulkanDevice->PreRender_rt();
             PaletteGlobal::client->Render_rt();
             PaletteGlobal::vulkanDevice->PostRender_rt();
-            PaletteGlobal::vulkanDevice->DrawFrame();
+            PaletteGlobal::vulkanDevice->DrawFrame_rt();
         }
 
         void _MainLoop()

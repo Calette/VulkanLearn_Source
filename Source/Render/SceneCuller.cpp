@@ -14,6 +14,7 @@ namespace Palette
 			Entity* entity = new Entity();
 			ModelComponent* model = entity->AddComponent<ModelComponent>();
 			PaletteGlobal::client->GetWorld()->AddEntity(entity);
+			entityList = PaletteGlobal::client->GetWorld()->GetEntityList();
 		}
 
 		for (auto entity : entityList)

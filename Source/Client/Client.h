@@ -14,6 +14,7 @@ namespace Palette
 		void Render_rt();
 
 		World* GetWorld() { return world; };
+		RenderPipeline* GetRenderPipeline() { return renderPipeline; };
 
 	protected:
 		RenderPipeline* renderPipeline;

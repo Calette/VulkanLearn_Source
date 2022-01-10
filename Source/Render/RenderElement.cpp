@@ -1,5 +1,6 @@
 #include "RenderElement.h"
 #include "IRenderPass.h"
+#include "Vulkan/VulkanGlobal.h"
 
 namespace Palette
 {
@@ -9,6 +10,17 @@ namespace Palette
 	{
 		// todo
 		// 直接加到各个passd的m_Elements
+		for (Shader shader : mat->GetShaders())
+		{
+			switch (shader->GetPassType())
+			{
+			case PassType::SimplePass:
+				//PaletteGlobal::client->GetRenderPipeline()
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 	void DrawMeshInstance(RenderMesh mesh, Material mat)
@@ -40,8 +52,6 @@ namespace Palette
 				vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
 				vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-				//uint32_t vertexDataSize = static_cast<uint32_t>(mesh->GetVertexData().size());
-				//vkCmdDraw(commandBuffers[i], vertexDataSize, 1, 0, 0);
 				uint32_t indexDataSize = static_cast<uint32_t>(element->Mesh->GetIndexData().size());
 				vkCmdDrawIndexed(cmd, static_cast<uint32_t>(indexDataSize), 1, 0, 0, 0);
 

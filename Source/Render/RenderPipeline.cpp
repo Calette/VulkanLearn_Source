@@ -32,10 +32,10 @@ namespace Palette
 			if (finalPass)
 				PaletteGlobal::vulkanDevice->FreeFramebuffers();
 			PaletteGlobal::vulkanDevice->CreateFramebuffers(pass->GetRenderPass());
-			pass->SetFramebuffer(PaletteGlobal::vulkanDevice->GetSwapChainFramebuffer());
-			pass->SetExtent(PaletteGlobal::vulkanDevice->GetExtent2D());
 			finalPass = pass;
 		}
+		pass->SetExtent(PaletteGlobal::vulkanDevice->GetExtent2D());
+		pass->SetFramebuffer(PaletteGlobal::vulkanDevice->GetSwapChainFramebuffer());
 	}
 
 	IRenderPass* RenderPipeline::Setup_rt()
