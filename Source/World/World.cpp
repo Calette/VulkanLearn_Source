@@ -8,13 +8,13 @@ namespace Palette
 
 	}
 
-	void World::Tick_ot()
+	void World::Update_ot()
 	{
 		for (auto entity : entities)
 		{
 			for (auto comp : entity.second->GetAllComponents())
 			{
-				comp->Tick_ot();
+				comp->Update_ot();
 			}
 		}
 	}

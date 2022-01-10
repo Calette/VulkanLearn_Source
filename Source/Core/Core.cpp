@@ -7,7 +7,7 @@
 
 #include "Render/Vulkan/VulkanGlobal.h"
 #include "Render/Vulkan/VulkanDevice.h"
-#include "Common/Guid.h"
+#include "Client/Client.h"
 
 namespace Palette
 {
@@ -16,16 +16,20 @@ namespace Palette
     public:
         void Run()
         {
-            _InitWindow();
-            _InitWorld();
-            _InitVulkan();
+            _Init();
             _MainLoop();
             _Cleanup();
         }
 
     private:
         GLFWwindow* window;
-        VulkanDevice* vulkanDevice;
+
+        void _Init()
+        {
+            _InitWindow();
+            _InitVulkan();
+            _InitClient();
+        }
 
         void _InitWindow()
         {
@@ -39,29 +43,25 @@ namespace Palette
 
         void _InitVulkan()
         {
-            vulkanDevice = new VulkanDevice(window);
+            PaletteGlobal::vulkanDevice = new VulkanDevice(window);
         }
 
-        void _InitWorld()
+        void _InitClient()
         {
-            uuid4_init();
-
-            PaletteGlobal::world = new World();
-            PaletteGlobal::world->Initialize();
+            PaletteGlobal::client = new Client();
         }
 
-        void _Tick_ot()
+        void _Update_ot()
         {
-            PaletteGlobal::world->Tick_ot();
-
-
+            PaletteGlobal::client->Update_ot();
         }
 
         void _Render_rt()
         {
-
-
-            vulkanDevice->DrawFrame();
+            PaletteGlobal::vulkanDevice->PreRender_rt();
+            PaletteGlobal::client->Render_rt();
+            PaletteGlobal::vulkanDevice->PostRender_rt();
+            PaletteGlobal::vulkanDevice->DrawFrame();
         }
 
         void _MainLoop()
@@ -71,8 +71,10 @@ namespace Palette
                 // checks for events like pressing the X button until the window has been closed by the user
                 glfwPollEvents();
 
-                _Tick_ot();
+                _Update_ot();
                 _Render_rt();
+
+                PaletteGlobal::frameCount++;
             }
 
             // wait for the logical device to finish operations before exiting mainLoop and destroying the window
@@ -81,8 +83,8 @@ namespace Palette
 
         void _Cleanup()
         {
-            delete PaletteGlobal::world;
-            delete vulkanDevice;
+            delete PaletteGlobal::client;
+            delete PaletteGlobal::vulkanDevice;
             glfwDestroyWindow(window);
             glfwTerminate();
         }

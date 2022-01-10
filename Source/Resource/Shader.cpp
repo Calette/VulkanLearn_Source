@@ -4,7 +4,6 @@
 #include "../Common/FileSystem.h"
 #include "../Common/MD5.h"
 #include "../Render/Vulkan/VulkanGlobal.h"
-#include "fmt/printf.h"
 #include "../Render/Mesh/VertexInputBindingDescription.h"
 
 namespace Palette
@@ -29,8 +28,7 @@ namespace Palette
 
     VertexPixelShaderModule::~VertexPixelShaderModule()
     {
-        vkDestroyShaderModule(PaletteGlobal::device, m_VertShaderModule, nullptr);
-        vkDestroyShaderModule(PaletteGlobal::device, m_PixelShaderModule, nullptr);
+
     }
 
     void VertexPixelShaderModule::OnRefDestroy()
@@ -143,6 +141,8 @@ namespace Palette
         {
             m_Type = ShaderType::None;
         }
+
+        m_PassType = PassType::SimplePass;
     }
 
     Shader ShaderResource::GetDefaultShader()
@@ -156,9 +156,14 @@ namespace Palette
 
     IShaderModule ShaderResource::GetShaderModule(uint32_t defineHash)
     {
-        // if defaultShader fails to load, here will be a infinite loop
         if (m_Type == ShaderType::None)
-            return GetDefaultShader()->GetShaderModule(0);
+        {
+            auto shader = GetDefaultShader();
+            if (shader->m_Type != ShaderType::None)
+                return shader->GetShaderModule(0);
+            else
+                throw std::runtime_error("defaultShader fails to load");
+        }
         return m_ShaderModules[defineHash];
     }
 

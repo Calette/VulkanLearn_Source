@@ -9,7 +9,7 @@ namespace Palette
 		
 	}
 
-	//void TransformComponent::Tick_ot()
+	//void TransformComponent::Update_ot()
 	//{
 	//	
 	//}

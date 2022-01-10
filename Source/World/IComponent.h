@@ -12,7 +12,7 @@ namespace Palette
 		IComponent(IObject* parent = nullptr);
 		virtual ~IComponent() {}
 
-		virtual void Tick_ot() {};
+		virtual void Update_ot() {};
 
 		IObject* GetParent() const noexcept { return m_Parent; }
 

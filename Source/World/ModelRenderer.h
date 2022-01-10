@@ -1,11 +1,11 @@
 #pragma once
-#include "Render/IRenderElement.h"
 #include "Resource/RenderMesh.h"
 #include "Resource/Material.h"
+#include "Render/RenderScene.h"
 
 namespace Palette
 {
-	class ModelRenderer : public IRenderElement
+	class ModelRenderer
 	{
 	public:
 		ModelRenderer();
@@ -16,7 +16,7 @@ namespace Palette
 		std::vector<RenderMesh>& GetAllMeshes() { return m_Meshes; }
 		std::vector<Material>& GetAllMaterials() { return m_Materials; }
 
-		void _DrawItem_rt() override;
+		void AddPrimitive_rt(RenderScene* scene);
 
 	protected:
 		std::vector<RenderMesh> m_Meshes;

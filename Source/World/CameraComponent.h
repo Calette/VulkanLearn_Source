@@ -10,6 +10,6 @@ namespace Palette
 		CameraComponent(IObject* parent = nullptr);
 
 	protected:
-		Camera* camera;
+		Camera* m_Camera;
 	};
 }

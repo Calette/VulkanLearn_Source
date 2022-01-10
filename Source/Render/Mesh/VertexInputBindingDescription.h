@@ -4,6 +4,7 @@
 
 #include <glm/glm.hpp>
 #include <array>
+#include <stdexcept>
 
 namespace Palette
 {
@@ -51,4 +52,6 @@ namespace Palette
 			return attributeDescriptions;
 		}
 	};
+
+	void GetVertexInputDescriptions(VertexFormat vertexFormat, VkVertexInputBindingDescription& bindingDescription, std::array<VkVertexInputAttributeDescription, 2>& attributeDescriptions);
 }

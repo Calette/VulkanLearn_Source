@@ -13,5 +13,7 @@ namespace PaletteGlobal
 	// Device queues are implicitly cleaned up when the device is destroyed, so we don't need to do anything in cleanup
 	VkQueue graphicsQueue = VK_NULL_HANDLE;
 
-	Palette::World* world = nullptr;
+	Palette::VulkanDevice* vulkanDevice = nullptr;
+	Palette::Client* client = nullptr;
+	uint32_t frameCount = 0;
 }

@@ -8,7 +8,7 @@ namespace Palette
 	{
 	public:
 		TransformComponent(IObject* parent = nullptr);
-		//void Tick_ot();
+		//void Update_ot();
 
 	protected:
 		Vecter3 position;

@@ -3,7 +3,8 @@
 #include <GLFW/glfw3.h>
 #include <string>
 
-#include "World/World.h"
+#include "Client/Client.h"
+#include "Render/Vulkan/VulkanDevice.h"
 
 namespace PaletteGlobal
 {
@@ -25,5 +26,7 @@ namespace PaletteGlobal
 	extern VkCommandPool commandPool;
 	extern VkQueue graphicsQueue;
 
-	extern Palette::World* world;
+	extern Palette::Client* client;
+	extern Palette::VulkanDevice* vulkanDevice;
+	extern uint32_t frameCount;
 }

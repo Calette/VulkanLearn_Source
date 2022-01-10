@@ -45,7 +45,15 @@ namespace Palette
         explicit VulkanDevice(GLFWwindow* window);
         ~VulkanDevice();
 
+        void PreRender_rt();
         void DrawFrame();
+        void PostRender_rt();
+
+        VkCommandBuffer& GetCommandBuffer();
+        VkExtent2D& GetExtent2D();
+        VkFramebuffer& GetSwapChainFramebuffer();
+        void CreateFramebuffers(VkRenderPass& renderPass);
+        void FreeFramebuffers();
 
     protected:
         void _CreateInstance();
@@ -54,10 +62,10 @@ namespace Palette
         void _PickPhysicalDevice();
         void _CreateLogicalDevice();
         void _CreateImageViews();
-        void _CreateRenderPass();
-        void _CreateDescriptorSetLayout();
-        void _CreateGraphicsPipeline();
-        void _CreateFramebuffers();
+        //void _CreateRenderPass();
+        //void _CreateDescriptorSetLayout();
+        //void _CreateGraphicsPipeline();
+        //void _CreateFramebuffers();
         void _CreateCommandPool();
         void _CreateCommandBuffers();
         void _CreateSyncObjects();
@@ -108,5 +116,8 @@ namespace Palette
         std::vector<VkFence> inFlightFences;
         std::vector<VkFence> imagesInFlight;
         size_t currentFrame = 0;
-	};
+        uint32_t imageIndex = 0;
+
+        VkCommandBufferBeginInfo beginInfo;
+    };
 }

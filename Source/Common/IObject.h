@@ -15,6 +15,7 @@ namespace Palette
 		virtual ~IObject() {};
 
 		std::string GetName() const noexcept { return m_Name; }
+		void SetName(const std::string& str) noexcept { m_Name = str; }
 
 		char* GetGuid() noexcept { return m_Guid; }
 

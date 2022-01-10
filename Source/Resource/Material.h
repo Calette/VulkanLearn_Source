@@ -4,6 +4,8 @@
 
 namespace Palette
 {
+	class IRenderPass;
+
 	enum BlendMode
 	{
 		BLEND_Opaque,
@@ -17,7 +19,7 @@ namespace Palette
 		~IMaterial() noexcept = default;
 
 	public:
-		std::vector<Shader>& GetShaders() { return m_Shaders; };
+		std::vector<Shader>& GetShaders() { return m_Shaders; }
 
 	protected:
 		std::vector<Shader> m_Shaders;
@@ -29,9 +31,10 @@ namespace Palette
 		MaterialResource();
 		~MaterialResource();
 		MaterialResource(Shader shader);
-		MaterialResource(MaterialResource* material);
 
 		void OnRefDestroy() override;
+		
+		Material Copy();
 
 		static Material GetDefualtMat();
 		static void ReleaseDefualtMat();

@@ -29,16 +29,14 @@ namespace Palette
 	MaterialResource::MaterialResource(Shader shader)
 		: IMaterial()
 	{
-		m_Shaders.push_back(shader);
+		m_Shaders.emplace_back(shader);
 	}
 
-	MaterialResource::MaterialResource(MaterialResource* material)
-		: IMaterial()
+	Material MaterialResource::Copy()
 	{
-		for (auto shader : material->GetShaders())
-		{
-			m_Shaders.push_back(shader);
-		}
+		MaterialResource* copyMat = new MaterialResource();
+		copyMat->m_Shaders = m_Shaders;
+		return Material(copyMat);
 	}
 
 	Material MaterialResource::GetDefualtMat()

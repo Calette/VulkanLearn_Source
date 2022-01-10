@@ -12,6 +12,12 @@
 
 namespace Palette
 {
+	enum class PassType
+	{
+		DefualtPass = 1,
+		SimplePass = 2,
+	};
+
 	class IShaderModuleResourse : public IRef
 	{
 	public:
@@ -28,7 +34,7 @@ namespace Palette
 
 	protected:
 		std::string m_Name;
-		uint32_t m_PassFlag;
+		uint32_t m_PassFlag = 0u;
 	};
 
 	class VertexPixelShaderModule : public IShaderModuleResourse
@@ -83,6 +89,14 @@ namespace Palette
 
 		IShaderModule GetShaderModule(uint32_t defineHash);
 
+		VkPipeline& GetPipeline() { return m_Pipeline; }
+
+		PassType GetPassType() { return m_PassType; }
+
+		bool HasPipeline() { return m_HasPipeline; }
+
+		void FinishCreatePipeline() { m_HasPipeline = true; }
+
 		void RealeaseAllShaderModule();
 
 		void RealeaseShaderModule(uint32_t defineHash);
@@ -98,6 +112,9 @@ namespace Palette
 		static const std::string DEFUALTSHADERPATH;
 		static Shader defaultShader;
 
+		bool m_HasPipeline = false;
+		PassType m_PassType;
+		VkPipeline m_Pipeline;
 		std::string m_SourcePath;
 		ShaderType m_Type;
 		uint32_t m_TimeStamp;

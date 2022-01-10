@@ -11,9 +11,9 @@ namespace Palette
 		~ModelComponent();
 
 		ModelRenderer* GetModelRenderer() { return m_ModelRenderer; }
-		void Tick_ot();
+		void Update_ot();
 		void Pick_ot() override;
-		void CollectPrimitive() override;
+		void CollectPrimitive_rt(Camera* camera, RenderScene* scene) override;
 
 	protected:
 		ModelRenderer* m_ModelRenderer;

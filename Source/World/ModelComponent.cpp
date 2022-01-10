@@ -1,4 +1,5 @@
 #include "ModelComponent.h"
+#include "Render/RenderScene.h"
 
 namespace Palette
 {
@@ -13,7 +14,7 @@ namespace Palette
 		delete m_ModelRenderer;
 	}
 
-	void ModelComponent::Tick_ot()
+	void ModelComponent::Update_ot()
 	{
 
 	}
@@ -23,8 +24,8 @@ namespace Palette
 
 	}
 
-	void ModelComponent::CollectPrimitive()
+	void ModelComponent::CollectPrimitive_rt(Camera* camera, RenderScene* scene)
 	{
-
+		m_ModelRenderer->AddPrimitive_rt(scene);
 	}
 }

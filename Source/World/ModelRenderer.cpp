@@ -38,21 +38,24 @@ namespace Palette
 	{
 		for (auto mat : m_Materials)
 		{
-			mat->GetShaders()[0]->RealeaseShaderModule(0);
+			for (auto shader : mat->GetShaders())
+				shader->RealeaseAllShaderModule();
 		}
 
 		//m_Meshes.clear();
 	}
 
-	void ModelRenderer::_DrawItem_rt()
+	void ModelRenderer::AddPrimitive_rt(RenderScene* scene)
 	{
-		int size = m_Materials.size();
-		if (size == m_Meshes.size())
+		size_t size = m_Meshes.size();
+		size_t maxSize = m_Materials.size() - 1;
+		for (size_t i = 0; i < size; i++)
 		{
-			for (int i = 0; i < size; i++)
-			{
-				DrawMesh(m_Meshes[i], m_Materials[i]);
-			}
+			RenderElement* element = new RenderElement();
+			element->Mesh = m_Meshes[i];
+			element->Mat = m_Materials[min(i, maxSize)];
+
+			scene->AddElement_rt(element);
 		}
 	}
 }

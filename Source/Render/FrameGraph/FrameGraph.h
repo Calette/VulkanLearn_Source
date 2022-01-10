@@ -1,5 +1,5 @@
 #pragma once
-
+#include <deque>
 #include "Render/IRenderPass.h"
 
 namespace Palette
@@ -22,13 +22,15 @@ namespace Palette
 
 	class FrameGraph
 	{
+	public:
+		void Setup_rt(IRenderPass* pass) noexcept;
+
+		void Execute_rt() noexcept;
 
 	protected:
-		void _Execute_rt() noexcept;
-
-		void _RenderPass_rt(IRenderPass* pass) noexcept;
+		void _RenderPass_rt(IRenderPass* pass, VkCommandBuffer& cmd) noexcept;
 
 	protected:
-		std::vector<IRenderPass*> m_Passes;
+		std::deque<IRenderPass*> m_Passes;
 	};
 }

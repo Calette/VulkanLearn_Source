@@ -23,7 +23,7 @@ namespace Palette
 		void RemoveEntity(Entity* entity) { entities.erase(entity->GetGuid()); }
 		std::unordered_map<char*, Entity*>& GetEntityList() { return entities; }
 
-		void Tick_ot();
+		void Update_ot();
 
 	protected:
 		std::unordered_map<char*, Entity*> entities;
