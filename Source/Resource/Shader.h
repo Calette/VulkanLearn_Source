@@ -12,12 +12,6 @@
 
 namespace Palette
 {
-	enum class PassType
-	{
-		DefualtPass = 1,
-		SimplePass = 2,
-	};
-
 	class IShaderModuleResourse : public IRef
 	{
 	public:
@@ -105,18 +99,18 @@ namespace Palette
 		void _ReloadShader(uint32_t newTimeStamp);
 
 	protected:
-		std::string m_Name;
+		std::string					m_Name;
 		// different define / passFlag
-		std::unordered_map<uint32_t, IShaderModule> m_ShaderModules;
+		std::unordered_map<uint32_t, IShaderModule>	m_ShaderModules;
 
-		static const std::string DEFUALTSHADERPATH;
-		static Shader defaultShader;
+		static const std::string	DEFUALTSHADERPATH;
+		static Shader				defaultShader;
 
-		bool m_HasPipeline = false;
-		PassType m_PassType;
-		VkPipeline m_Pipeline;
-		std::string m_SourcePath;
-		ShaderType m_Type;
-		uint32_t m_TimeStamp;
+		bool						m_HasPipeline	= false;
+		PassType					m_PassType;
+		VkPipeline					m_Pipeline;
+		std::string					m_SourcePath;
+		ShaderType					m_Type;
+		uint32_t					m_TimeStamp;
 	};
 }

@@ -7,17 +7,16 @@ namespace Palette
 {
 	void SceneCuller::Culling(Camera* camera, RenderScene* scene)
 	{
-		auto entityList = PaletteGlobal::client->GetWorld()->GetEntityList();
+		auto& entityList = PaletteGlobal::client->GetWorld()->GetEntityList();
 
 		if (entityList.size() == 0)
 		{
 			Entity* entity = new Entity();
 			ModelComponent* model = entity->AddComponent<ModelComponent>();
 			PaletteGlobal::client->GetWorld()->AddEntity(entity);
-			entityList = PaletteGlobal::client->GetWorld()->GetEntityList();
 		}
 
-		for (auto entity : entityList)
+		for (auto& entity : entityList)
 		{
 			IPrimitiveComponent* primitive = entity.second->GetComponent<IPrimitiveComponent>();
 			if (primitive)

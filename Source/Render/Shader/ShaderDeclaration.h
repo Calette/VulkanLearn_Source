@@ -10,6 +10,12 @@ namespace Palette
 		None
 	};
 
+	enum class PassType
+	{
+		DefualtPass = 1,
+		SimplePass = 2,
+	};
+
 	enum class ConstantBufferType
 	{
 		GlobalConstant

@@ -10,17 +10,13 @@ namespace Palette
 		RenderPipeline();
 		~RenderPipeline();
 
-		void Update_rt();
+		void Pass_Update_rt();
 		void Render_rt();
 		IRenderPass* Setup_rt();
-		void SetFinalPass(IRenderPass* pass);
 
 	protected:
-		FrameGraph* m_FrameGraph;
-
+		FrameGraph* frameGraph;
 		RenderScene* mainScene;
-
-		IRenderPass* finalPass = nullptr;
 
 		SimplePass simplePass;
 	};

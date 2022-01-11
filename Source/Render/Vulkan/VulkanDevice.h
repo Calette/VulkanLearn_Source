@@ -52,6 +52,8 @@ namespace Palette
         VkCommandBuffer& GetCommandBuffer();
         VkExtent2D& GetExtent2D();
         VkFramebuffer& GetSwapChainFramebuffer();
+        uint32_t GetImageCount() const { return imageCount; }
+        uint32_t GetImageIndex() const { return imageIndex; }
         void CreateFramebuffers(VkRenderPass& renderPass);
         void FreeFramebuffers();
 
@@ -85,39 +87,40 @@ namespace Palette
         SwapChainSupportDetails _QuerySwapChainSupport(VkPhysicalDevice device);
 
     protected:
-        VkSurfaceKHR surface;
+        VkSurfaceKHR                surface;
         
         // Device queues are implicitly cleaned up when the device is destroyed, so we don't need to do anything in cleanup
-        VkQueue presentQueue;
+        VkQueue                     presentQueue;
 
-        VkSwapchainKHR swapChain;
+        VkSwapchainKHR              swapChain;
         // The images were created by the implementation for the swap chain and they will be automatically cleaned up once the swap chain has been destroyed
-        std::vector<VkImage> swapChainImages;
-        VkFormat swapChainImageFormat;
-        VkExtent2D swapChainExtent;
-        std::vector<VkImageView> swapChainImageViews;
-        std::vector<VkFramebuffer> swapChainFramebuffers;
+        std::vector<VkImage>        swapChainImages;
+        VkFormat                    swapChainImageFormat;
+        VkExtent2D                  swapChainExtent;
+        std::vector<VkImageView>    swapChainImageViews;
+        std::vector<VkFramebuffer>  swapChainFramebuffers;
 
         //VkRenderPass renderPass;
         //VkDescriptorSetLayout descriptorSetLayout;
         //VkPipelineLayout pipelineLayout;
         //VkPipeline graphicsPipeline;
+        VkCommandBufferBeginInfo        beginInfo;
 
         //VkBuffer indexBuffer;
         //VkDeviceMemory indexBufferMemory;
 
-        std::vector<VkBuffer> uniformBuffers;
-        std::vector<VkDeviceMemory> uniformBuffersMemory;
+        //std::vector<VkBuffer> uniformBuffers;
+        //std::vector<VkDeviceMemory> uniformBuffersMemory;
 
-        std::vector<VkCommandBuffer> commandBuffers;
+        std::vector<VkCommandBuffer>    commandBuffers;
 
-        std::vector<VkSemaphore> imageAvailableSemaphores;
-        std::vector<VkSemaphore> renderFinishedSemaphores;
-        std::vector<VkFence> inFlightFences;
-        std::vector<VkFence> imagesInFlight;
-        size_t currentFrame = 0;
-        uint32_t imageIndex = 0;
+        std::vector<VkSemaphore>        imageAvailableSemaphores;
+        std::vector<VkSemaphore>        renderFinishedSemaphores;
+        std::vector<VkFence>            inFlightFences;
+        std::vector<VkFence>            imagesInFlight;
 
-        VkCommandBufferBeginInfo beginInfo;
+        uint32_t                        imageCount      = 0;
+        size_t                          currentFrame    = 0;
+        uint32_t                        imageIndex      = 0;
     };
 }

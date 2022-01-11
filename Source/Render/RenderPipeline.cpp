@@ -7,35 +7,21 @@ namespace Palette
 {
 	RenderPipeline::RenderPipeline()
 	{
-		m_FrameGraph = new FrameGraph();
+		frameGraph = new FrameGraph();
 		mainScene = new RenderScene(Camera::MainCamera);
 	}
 
 	RenderPipeline::~RenderPipeline()
 	{
-		delete m_FrameGraph;
+		delete frameGraph;
 		delete mainScene;
 	}
 
-	void RenderPipeline::Update_rt()
+	void RenderPipeline::Pass_Update_rt()
 	{
 		RenderElement::PreRenderShader = nullptr;
 		mainScene->Reset();
 		simplePass.Update_rt();
-	}
-
-	void RenderPipeline::SetFinalPass(IRenderPass* pass)
-	{
-		pass->SetFinalOutput();
-		if (finalPass != pass)
-		{
-			if (finalPass)
-				PaletteGlobal::vulkanDevice->FreeFramebuffers();
-			PaletteGlobal::vulkanDevice->CreateFramebuffers(pass->GetRenderPass());
-			finalPass = pass;
-		}
-		pass->SetExtent(PaletteGlobal::vulkanDevice->GetExtent2D());
-		pass->SetFramebuffer(PaletteGlobal::vulkanDevice->GetSwapChainFramebuffer());
 	}
 
 	IRenderPass* RenderPipeline::Setup_rt()
@@ -44,7 +30,6 @@ namespace Palette
 
 		output = simplePass.Connect(output, mainScene);
 
-		SetFinalPass(output);
 		return output;
 	}
 
@@ -55,14 +40,15 @@ namespace Palette
 			// todo
 			//return;
 		}
-		Update_rt();
+
+		Pass_Update_rt();
 
 		mainScene->SetCamera(Camera::MainCamera);
 		SceneCuller::Instance()->Culling(Camera::MainCamera, mainScene);
 
 		IRenderPass* pass = Setup_rt();
 
-		m_FrameGraph->Setup_rt(pass);
-		m_FrameGraph->Execute_rt();
+		frameGraph->Setup_rt(pass);
+		frameGraph->Execute_rt();
 	}
 }

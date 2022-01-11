@@ -531,7 +531,7 @@ namespace Palette
         VkPresentModeKHR presentMode = _ChooseSwapPresentMode(swapChainSupport.presentModes);
         VkExtent2D extent = _ChooseSwapExtent(swapChainSupport.capabilities, window);
 
-        uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+        imageCount = swapChainSupport.capabilities.minImageCount + 1;
 
         // 0 is a special value that means that there is no maximum
         if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)

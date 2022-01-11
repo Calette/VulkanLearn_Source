@@ -1,6 +1,7 @@
 #include "RenderElement.h"
 #include "IRenderPass.h"
 #include "Vulkan/VulkanGlobal.h"
+#include "Render/Shader/ConstantBuffer.h"
 
 namespace Palette
 {
@@ -52,8 +53,10 @@ namespace Palette
 				vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
 				vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pass->GetPipelineLayout(), 0, 1, pass->GetDescriptorSet(), 0, nullptr);
+
 				uint32_t indexDataSize = static_cast<uint32_t>(element->Mesh->GetIndexData().size());
-				vkCmdDrawIndexed(cmd, static_cast<uint32_t>(indexDataSize), 1, 0, 0, 0);
+				vkCmdDrawIndexed(cmd, indexDataSize, 1, 0, 0, 0);
 
 				RenderElement::PreRenderShader = shader;
 			}

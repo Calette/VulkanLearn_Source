@@ -1,28 +1,11 @@
 #include "IRenderPass.h"
 #include "Render/Vulkan/VulkanGlobal.h"
+#include "Render/Shader/ConstantBuffer.h"
 
 namespace Palette
 {
-    void CreateDescriptorSetLayout(VkDescriptorSetLayout& descriptorSetLayout)
-    {
-        VkDescriptorSetLayoutBinding uboLayoutBinding{};
-        uboLayoutBinding.binding = 0;
-        uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        uboLayoutBinding.descriptorCount = 1;
-        uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-        uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
-
-        VkDescriptorSetLayoutCreateInfo layoutInfo{};
-        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = 1;
-        layoutInfo.pBindings = &uboLayoutBinding;
-
-        if (vkCreateDescriptorSetLayout(PaletteGlobal::device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create descriptor set layout!");
-        }
-    }
-
+    using PaletteGlobal::device;
+    
     void CreateRenderPass(VkRenderPass& renderPass, const PassInfo& info)
     {
         VkAttachmentDescription colorAttachment{};
@@ -61,46 +44,15 @@ namespace Palette
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies = &dependency;
 
-        if (vkCreateRenderPass(PaletteGlobal::device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
+        if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create render pass!");
         }
     }
 
-    void SetFrameBuffer(IRenderPass* renderPass)
-    {
-        VkFramebuffer framebuffer = renderPass->GetFramebuffer();
-        VkExtent2D extent = renderPass->GetExtent();
-        if (renderPass->IsFinalOutput())
-        {
-            //framebuffer = PaletteGlobal::vulkanDevice->GetSwapChainFramebuffer();
-            //extent = PaletteGlobal::vulkanDevice->GetExtent2D();
-        }
-        else
-        {
-
-        }
-    }
-
-    void BeginRenderPass(IRenderPass* renderPass)
-    {
-        VkRenderPassBeginInfo renderPassInfo{};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = renderPass->GetRenderPass();
-        renderPassInfo.framebuffer = renderPass->GetFramebuffer();
-        renderPassInfo.renderArea.offset = { 0, 0 };
-        renderPassInfo.renderArea.extent = renderPass->GetExtent();
-
-        VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-        renderPassInfo.clearValueCount = 1;
-        renderPassInfo.pClearValues = &clearColor;
-
-        vkCmdBeginRenderPass(renderPass->GetCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-    }
-
     void CreatePipeline(IRenderPass* pass, Shader shader)
     {
-        VkExtent2D extent = pass->GetExtent();
+        VkExtent2D& extent = pass->GetExtent();
 
         // Viewports and scissors
         VkViewport viewport{};
@@ -131,7 +83,7 @@ namespace Palette
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth = 1.0f;
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
         rasterizer.depthBiasEnable = VK_FALSE;
 
         VkPipelineMultisampleStateCreateInfo multisampling{};
@@ -157,10 +109,10 @@ namespace Palette
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = 1;
-        pipelineLayoutInfo.pSetLayouts = pass->GetDescriptorSetLayout();
+        pipelineLayoutInfo.pSetLayouts = &GlobalConstantBuffer::Instance()->GetDescriptorSetLayout();
         pipelineLayoutInfo.pushConstantRangeCount = 0;
 
-        if (vkCreatePipelineLayout(PaletteGlobal::device, &pipelineLayoutInfo, nullptr, &pass->GetPipelineLayout()) != VK_SUCCESS)
+        if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pass->GetPipelineLayout()) != VK_SUCCESS)
         {
             throw std::runtime_error(pass->GetName() + "failed to create pipeline layout!");
         }
@@ -202,10 +154,41 @@ namespace Palette
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
         //pipelineInfo.basePipelineIndex = -1; // Optional
 
-        if (vkCreateGraphicsPipelines(PaletteGlobal::device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &shader->GetPipeline()) != VK_SUCCESS)
+        if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &shader->GetPipeline()) != VK_SUCCESS)
         {
             throw std::runtime_error(pass->GetName() + "failed to create graphics pipeline!");
         }
+    }
+
+    void SetFrameBuffer(IRenderPass* renderPass)
+    {
+        //VkFramebuffer framebuffer = renderPass->GetFramebuffer();
+        //VkExtent2D extent = renderPass->GetExtent();
+        //if (renderPass->IsFinalOutput())
+        //{
+        //    framebuffer = PaletteGlobal::vulkanDevice->GetSwapChainFramebuffer();
+        //    extent = PaletteGlobal::vulkanDevice->GetExtent2D();
+        //}
+        //else
+        //{
+
+        //}
+    }
+
+    void BeginRenderPass(IRenderPass* renderPass)
+    {
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = renderPass->GetRenderPass();
+        renderPassInfo.framebuffer = renderPass->GetFramebuffer();
+        renderPassInfo.renderArea.offset = { 0, 0 };
+        renderPassInfo.renderArea.extent = renderPass->GetExtent();
+
+        VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+        renderPassInfo.clearValueCount = 1;
+        renderPassInfo.pClearValues = &clearColor;
+
+        vkCmdBeginRenderPass(renderPass->GetCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
 
     IRenderPass::IRenderPass()
@@ -213,16 +196,28 @@ namespace Palette
         , m_Cmd(VK_NULL_HANDLE)
         , m_FrameBuffer(VK_NULL_HANDLE)
     {
-        m_DescriptorSetLayout = new VkDescriptorSetLayout();
         m_info.format = VK_FORMAT_B8G8R8A8_SRGB;
 
         CreateRenderPass(m_RenderPass, m_info);
-        CreateDescriptorSetLayout(*m_DescriptorSetLayout);
     }
 
     IRenderPass::~IRenderPass()
     {
-        vkDestroyRenderPass(PaletteGlobal::device, m_RenderPass, nullptr);
+        vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr);
+        vkDestroyRenderPass(device, m_RenderPass, nullptr);
+    }
+
+    void IRenderPass::Update_rt()
+    {
+        for (auto element : m_Elements)
+        {
+            delete element;
+        }
+        m_Elements.clear();
+        m_Effective = false;
+        m_FinalOutput = false;
+
+        m_DescriptorSet = &GlobalConstantBuffer::Instance()->GetDescriptorSet();
     }
 
     void IRenderPass::Initialize(VkCommandBuffer& cmd)
@@ -231,18 +226,6 @@ namespace Palette
         SetFrameBuffer(this);
         BeginRenderPass(this);
     }
-
-	void IRenderPass::Update_rt()
-	{
-		for (auto element : m_Elements)
-		{
-			delete element;
-		}
-		m_Elements.clear();
-
-        m_Effective = false;
-        m_FinalOutput = false;
-	}
 
     void IRenderPass::Render_rt()
     {

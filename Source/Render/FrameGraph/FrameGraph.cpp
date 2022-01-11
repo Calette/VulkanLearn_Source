@@ -3,10 +3,27 @@
 
 namespace Palette
 {
+	using PaletteGlobal::vulkanDevice;
+
+	void FrameGraph::_SetFinalPass(IRenderPass* pass)
+	{
+		pass->SetFinalOutput();
+		if (finalPass != pass)
+		{
+			if (finalPass)
+				vulkanDevice->FreeFramebuffers();
+			vulkanDevice->CreateFramebuffers(pass->GetRenderPass());
+			finalPass = pass;
+		}
+		pass->SetExtent(vulkanDevice->GetExtent2D());
+		pass->SetFramebuffer(vulkanDevice->GetSwapChainFramebuffer());
+	}
+
 	void FrameGraph::Setup_rt(IRenderPass* pass) noexcept
 	{
 		m_Passes.clear();
 
+		_SetFinalPass(pass);
 		pass->SetEffective();
 		m_Passes.emplace_front(pass);
 		auto preNodes = pass->GetInputNodes();

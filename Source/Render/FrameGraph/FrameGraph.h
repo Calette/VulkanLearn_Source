@@ -29,8 +29,10 @@ namespace Palette
 
 	protected:
 		void _RenderPass_rt(IRenderPass* pass, VkCommandBuffer& cmd) noexcept;
+		void _SetFinalPass(IRenderPass* pass);
 
 	protected:
 		std::deque<IRenderPass*> m_Passes;
+		IRenderPass* finalPass = nullptr;
 	};
 }

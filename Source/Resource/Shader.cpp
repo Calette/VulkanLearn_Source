@@ -97,6 +97,8 @@ namespace Palette
 
     ShaderResource::~ShaderResource()
     {
+        // todo ÓÐ±¨´í
+        //vkDestroyPipeline(PaletteGlobal::device, m_Pipeline, nullptr);
         m_ShaderModules.clear();
     }
 
