@@ -1,6 +1,7 @@
 #include "IRenderPass.h"
 #include "Render/Vulkan/VulkanGlobal.h"
 #include "Render/Shader/ConstantBuffer.h"
+#include "Render/Vulkan/VulkanCommon.h"
 
 namespace Palette
 {
@@ -44,10 +45,7 @@ namespace Palette
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies = &dependency;
 
-        if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create render pass!");
-        }
+        VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass))
     }
 
     void CreatePipeline(IRenderPass* pass, Shader shader)
@@ -112,10 +110,7 @@ namespace Palette
         pipelineLayoutInfo.pSetLayouts = &GlobalConstantBuffer::Instance()->GetDescriptorSetLayout();
         pipelineLayoutInfo.pushConstantRangeCount = 0;
 
-        if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pass->GetPipelineLayout()) != VK_SUCCESS)
-        {
-            throw std::runtime_error(pass->GetName() + "failed to create pipeline layout!");
-        }
+        VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pass->GetPipelineLayout()))
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
@@ -154,10 +149,7 @@ namespace Palette
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
         //pipelineInfo.basePipelineIndex = -1; // Optional
 
-        if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &shader->GetPipeline()) != VK_SUCCESS)
-        {
-            throw std::runtime_error(pass->GetName() + "failed to create graphics pipeline!");
-        }
+        VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &shader->GetPipeline()))
     }
 
     void SetFrameBuffer(IRenderPass* renderPass)

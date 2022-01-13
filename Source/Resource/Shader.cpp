@@ -5,6 +5,7 @@
 #include "../Common/MD5.h"
 #include "../Render/Vulkan/VulkanGlobal.h"
 #include "../Render/Mesh/VertexInputBindingDescription.h"
+#include "Render/Vulkan/VulkanCommon.h"
 
 namespace Palette
 {
@@ -20,10 +21,7 @@ namespace Palette
         createInfo.codeSize = code.size();
         createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-        if (vkCreateShaderModule(PaletteGlobal::device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
-        {
-            throw std::runtime_error(m_Name + " : failed to create shader module!");
-        }
+        VK_CHECK_RESULT(vkCreateShaderModule(PaletteGlobal::device, &createInfo, nullptr, &shaderModule))
     }
 
     VertexPixelShaderModule::~VertexPixelShaderModule()

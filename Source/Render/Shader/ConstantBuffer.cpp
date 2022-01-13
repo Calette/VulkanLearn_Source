@@ -1,4 +1,5 @@
 #include "ConstantBuffer.h"
+#include "Render/Vulkan/VulkanCommon.h"
 
 namespace Palette
 {
@@ -10,7 +11,7 @@ namespace Palette
 		_CreateDescriptorSets();
 	}
 
-	GlobalConstantBuffer::~GlobalConstantBuffer()
+	void GlobalConstantBuffer::ReleaseGlobalConstantBuffer()
 	{
 		for (size_t i = 0; i < m_UniformBuffers.size(); i++)
 		{
@@ -44,7 +45,7 @@ namespace Palette
 		ubo.proj[1][1] *= -1;
 
 		void* data;
-		vkMapMemory(device, m_UniformBuffersMemory[index], 0, sizeof(ubo), 0, &data);
+		VK_CHECK_RESULT(vkMapMemory(device, m_UniformBuffersMemory[index], 0, sizeof(ubo), 0, &data))
 		memcpy(data, &ubo, sizeof(ubo));
 		vkUnmapMemory(device, m_UniformBuffersMemory[index]);
 	}
@@ -63,10 +64,7 @@ namespace Palette
 		layoutInfo.bindingCount = 1;
 		layoutInfo.pBindings = &uboLayoutBinding;
 
-		if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &m_DescriptorSetLayout) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create descriptor set layout!");
-		}
+		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &m_DescriptorSetLayout))
 	}
 
 	void GlobalConstantBuffer::_CreateUniformBuffers()
@@ -99,10 +97,7 @@ namespace Palette
 		poolInfo.pPoolSizes = &poolSize;
 		poolInfo.maxSets = size;
 
-		if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create descriptor pool!");
-		}
+		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_DescriptorPool))
 	}
 
 	void GlobalConstantBuffer::_CreateDescriptorSets()
@@ -117,10 +112,7 @@ namespace Palette
 		allocInfo.pSetLayouts = layouts.data();
 
 		m_DescriptorSets.resize(size);
-		if (vkAllocateDescriptorSets(device, &allocInfo, m_DescriptorSets.data()) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to allocate descriptor sets!");
-		}
+		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, m_DescriptorSets.data()))
 
 		for (size_t i = 0; i < size; i++)
 		{

@@ -17,6 +17,7 @@ namespace Palette
 
 	Client::~Client()
 	{
+		GlobalConstantBuffer::Instance()->ReleaseGlobalConstantBuffer();
 		delete renderPipeline;
 		delete world;
 	}

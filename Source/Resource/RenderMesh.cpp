@@ -35,7 +35,7 @@ namespace Palette
 			stagingBuffer, stagingBufferMemory);
 
 		void* data;
-		vkMapMemory(PaletteGlobal::device, stagingBufferMemory, 0, bufferSize, 0, &data);
+		VK_CHECK_RESULT(vkMapMemory(PaletteGlobal::device, stagingBufferMemory, 0, bufferSize, 0, &data))
 		memcpy(data, m_VertexRenderData.m_VertexData.data(), (size_t)bufferSize);
 		vkUnmapMemory(PaletteGlobal::device, stagingBufferMemory);
 

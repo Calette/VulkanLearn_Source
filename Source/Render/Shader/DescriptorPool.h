@@ -4,6 +4,7 @@
 
 #include "Common/Singleton.h"
 #include "Render/Vulkan/VulkanGlobal.h"
+#include "Render/Vulkan/VulkanCommon.h"
 
 namespace Palette
 {
@@ -24,13 +25,10 @@ namespace Palette
 			poolInfo.pPoolSizes = &poolSize;
 			poolInfo.maxSets = size;
 
-			if (vkCreateDescriptorPool(PaletteGlobal::device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-			{
-				throw std::runtime_error("failed to create descriptor pool!");
-			}
+			VK_CHECK_RESULT(vkCreateDescriptorPool(PaletteGlobal::device, &poolInfo, nullptr, &descriptorPool))
 		}
 
-		~DescriptorPool()
+		void ReleaseDescriptorPool()
 		{
 			vkDestroyDescriptorPool(PaletteGlobal::device, descriptorPool, nullptr);
 		}

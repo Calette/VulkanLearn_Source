@@ -22,9 +22,9 @@ namespace Palette
 	{
 	public:
 		GlobalConstantBuffer();
-		~GlobalConstantBuffer();
 
 		void GetGlobalConstantBuffer(ConstantBufferType cbtype, GlobalConstant* data);
+		void ReleaseGlobalConstantBuffer();
 
 		void UpdateUniformBuffer();
 

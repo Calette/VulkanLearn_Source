@@ -22,8 +22,6 @@ namespace Palette
         }
 
     private:
-        GLFWwindow* window;
-
         void _Init()
         {
             _InitWindow();
@@ -38,12 +36,12 @@ namespace Palette
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
             glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-            window = glfwCreateWindow(PaletteGlobal::WIDTH, PaletteGlobal::HEIGHT, "Palette", nullptr, nullptr);
+            PaletteGlobal::window = glfwCreateWindow(PaletteGlobal::width, PaletteGlobal::height, "Palette", nullptr, nullptr);
         }
 
         void _InitVulkan()
         {
-            PaletteGlobal::vulkanDevice = new VulkanDevice(window);
+            PaletteGlobal::vulkanDevice = new VulkanDevice();
         }
 
         void _InitClient()
@@ -66,7 +64,7 @@ namespace Palette
 
         void _MainLoop()
         {
-            while (!glfwWindowShouldClose(window))
+            while (!glfwWindowShouldClose(PaletteGlobal::window))
             {
                 // checks for events like pressing the X button until the window has been closed by the user
                 glfwPollEvents();
@@ -85,7 +83,7 @@ namespace Palette
         {
             delete PaletteGlobal::client;
             delete PaletteGlobal::vulkanDevice;
-            glfwDestroyWindow(window);
+            glfwDestroyWindow(PaletteGlobal::window);
             glfwTerminate();
         }
     };

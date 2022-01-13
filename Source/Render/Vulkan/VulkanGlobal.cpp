@@ -6,6 +6,10 @@ namespace PaletteGlobal
 	const std::string PROJECTPATH = _getcwd(NULL, 0);
 	const std::string SHADERPATH = PROJECTPATH + "/Shaders/";
 
+	extern int width = 800;
+	extern int height = 600;
+
+	GLFWwindow* window = nullptr;
 	VkInstance instance = VK_NULL_HANDLE;
 	VkDevice device = VK_NULL_HANDLE;
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;

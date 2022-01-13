@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 project(VulkanLearn)
 
 #Message(STATUS "Processing Project ${PROJNAME}:")
-message(WARNING "注意：需要手动设置 Working Directory 为原目录")
+message(WARNING "注意：需要手动设置 Working Directory 为原Source目录")
 
 # Property
 set(CMAKE_CXX_STANDARD 17)
@@ -43,7 +43,7 @@ macro(source_group_by_dir source_files)
         if(sgbd_nogroup)
             set(sgbd_group_name "\\")
         endif(sgbd_nogroup)
-		#message("The Group: " ${sgbd_group_name})
+        #message("The Group: " ${sgbd_group_name})
         source_group(${sgbd_group_name} FILES ${sgbd_file})
     endforeach(sgbd_file)
 endmacro(source_group_by_dir)

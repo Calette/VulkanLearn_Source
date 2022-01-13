@@ -2,7 +2,8 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include "VulkanGlobal.h"
+#include "Render/Vulkan/VulkanGlobal.h"
+#include "Render/Vulkan/VulkanCommon.h"
 
 namespace Palette
 {
@@ -66,9 +67,6 @@ namespace Palette
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
         PopulateDebugMessengerCreateInfo(createInfo);
 
-        if (CreateDebugUtilsMessengerEXT(PaletteGlobal::instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to set up debug messenger!");
-        }
+        VK_CHECK_RESULT(CreateDebugUtilsMessengerEXT(PaletteGlobal::instance, &createInfo, nullptr, &debugMessenger))
     }
 }

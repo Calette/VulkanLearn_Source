@@ -14,12 +14,13 @@ namespace PaletteGlobal
 	const bool enableValidationLayers = true;
 #endif
 
-	const uint32_t WIDTH = 800;
-	const uint32_t HEIGHT = 600;
+	extern int width;
+	extern int height;
 
 	extern const std::string PROJECTPATH;
 	extern const std::string SHADERPATH;
 
+	extern GLFWwindow* window;
 	extern VkDevice device;
 	extern VkPhysicalDevice physicalDevice;
 	extern VkInstance instance;

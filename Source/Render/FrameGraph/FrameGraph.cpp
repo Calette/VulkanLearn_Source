@@ -1,5 +1,6 @@
 #include "FrameGraph.h"
 #include "Render/Vulkan/VulkanGlobal.h"
+#include "Render/Vulkan/VulkanSwapChain.h"
 
 namespace Palette
 {
@@ -11,8 +12,8 @@ namespace Palette
 		if (finalPass != pass)
 		{
 			if (finalPass)
-				vulkanDevice->FreeFramebuffers();
-			vulkanDevice->CreateFramebuffers(pass->GetRenderPass());
+				vulkanDevice->GetVulkanSwapChain()->FreeFramebuffers();
+			vulkanDevice->GetVulkanSwapChain()->CreateFramebuffers(pass->GetRenderPass());
 			finalPass = pass;
 		}
 		pass->SetExtent(vulkanDevice->GetExtent2D());
