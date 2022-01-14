@@ -117,8 +117,8 @@ namespace Palette
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
         VkVertexInputBindingDescription bindingDescription;
-        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions;
-        GetVertexInputDescriptions(VertexFormat::VERTEX_P2_C3, bindingDescription, attributeDescriptions);
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+        GetVertexInputDescriptions(VertexFormat::VERTEX_P2_C3_T2, bindingDescription, attributeDescriptions);
 
         vertexInputInfo.vertexBindingDescriptionCount = 0;
         vertexInputInfo.vertexAttributeDescriptionCount = 0;

@@ -90,7 +90,7 @@ namespace Palette
         
     }
 
-    const std::string ShaderResource::DEFUALTSHADERPATH = "triangle.shader";
+    const std::string ShaderResource::DEFUALT_SHADE_RPATH = "triangle.shader";
     Shader ShaderResource::defaultShader = nullptr;
 
     ShaderResource::~ShaderResource()
@@ -149,7 +149,7 @@ namespace Palette
     {
         if (!defaultShader)
         {
-            defaultShader = Shader(new ShaderResource(DEFUALTSHADERPATH));
+            defaultShader = Shader(new ShaderResource(DEFUALT_SHADE_RPATH));
         }
         return defaultShader;
     }

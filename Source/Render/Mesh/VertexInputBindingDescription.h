@@ -3,14 +3,14 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
-#include <array>
+#include <vector>
 #include <stdexcept>
 
 namespace Palette
 {
 	enum class VertexFormat
 	{
-		VERTEX_P2_C3
+		VERTEX_P2_C3_T2
 	};
 
 	struct Vertex
@@ -18,40 +18,18 @@ namespace Palette
 
 	};
 
-	struct Vertex_P2_C3 : public Vertex
+	struct Vertex_P2_C3_T2 : public Vertex
 	{
 		glm::vec2 pos;
 		glm::vec3 color;
+		glm::vec2 texCoord;
 
-		Vertex_P2_C3(glm::vec2 p, glm::vec3 c) : pos(p), color(c) {}
+		Vertex_P2_C3_T2(glm::vec2 p, glm::vec3 c, glm::vec2 t) : pos(p), color(c), texCoord(t) {}
 
-		static VkVertexInputBindingDescription GetBindingDescription()
-		{
-			VkVertexInputBindingDescription bindingDescription{};
-			bindingDescription.binding = 0;
-			bindingDescription.stride = sizeof(Vertex_P2_C3);
-			bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		static void GetBindingDescription(VkVertexInputBindingDescription& bindingDescription);
 
-			return bindingDescription;
-		}
-
-		static std::array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions()
-		{
-			std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
-
-			attributeDescriptions[0].binding = 0;
-			attributeDescriptions[0].location = 0;
-			attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-			attributeDescriptions[0].offset = offsetof(Vertex_P2_C3, pos);
-
-			attributeDescriptions[1].binding = 0;
-			attributeDescriptions[1].location = 1;
-			attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[1].offset = offsetof(Vertex_P2_C3, color);
-
-			return attributeDescriptions;
-		}
+		static void GetAttributeDescriptions(std::vector<VkVertexInputAttributeDescription>& attributeDescriptions);
 	};
 
-	void GetVertexInputDescriptions(VertexFormat vertexFormat, VkVertexInputBindingDescription& bindingDescription, std::array<VkVertexInputAttributeDescription, 2>& attributeDescriptions);
+	void GetVertexInputDescriptions(VertexFormat vertexFormat, VkVertexInputBindingDescription& bindingDescription, std::vector<VkVertexInputAttributeDescription>& attributeDescriptions);
 }

@@ -103,7 +103,7 @@ namespace Palette
 		// different define / passFlag
 		std::unordered_map<uint32_t, IShaderModule>	m_ShaderModules;
 
-		static const std::string	DEFUALTSHADERPATH;
+		static const std::string	DEFUALT_SHADE_RPATH;
 		static Shader				defaultShader;
 
 		bool						m_HasPipeline	= false;

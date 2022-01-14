@@ -40,8 +40,6 @@ namespace Palette
 
     VulkanDevice::~VulkanDevice()
     {
-        MaterialResource::ReleaseDefualtMat();
-
         //_CleanupSwapChain();
         vulkanSwapChain->CleanupSwapChain();
         delete vulkanSwapChain;
@@ -863,9 +861,9 @@ namespace Palette
 
     //    switch (model->GetModelRenderer()->GetMeshes()->GetVertexRenderData().m_VertexFormat)
     //    {
-    //    case VertexFormat::VERTEX_P2_C3:
-    //        bindingDescription = Vertex_P2_C3::GetBindingDescription();
-    //        attributeDescriptions = Vertex_P2_C3::GetAttributeDescriptions();
+    //    case VertexFormat::VERTEX_P2_C3_T2:
+    //        bindingDescription = Vertex_P2_C3_T2::GetBindingDescription();
+    //        attributeDescriptions = Vertex_P2_C3_T2::GetAttributeDescriptions();
     //        break;
     //    default:
     //        throw std::runtime_error("failed to create Vertex Description!");
