@@ -108,7 +108,7 @@ namespace Palette
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		allocInfo.descriptorPool = m_DescriptorPool;
-		allocInfo.descriptorSetCount = static_cast<uint32_t>(size);
+		allocInfo.descriptorSetCount = size;
 		allocInfo.pSetLayouts = layouts.data();
 
 		m_DescriptorSets.resize(size);

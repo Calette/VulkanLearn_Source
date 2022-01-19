@@ -68,18 +68,15 @@ namespace Palette
 
     void VulkanDevice::PreRender_rt()
     {
-        if (PaletteGlobal::frameCount != 0)
+        vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+        VkResult result = vkAcquireNextImageKHR(device, vulkanSwapChain->swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+        if ((result == VK_ERROR_OUT_OF_DATE_KHR) || (result == VK_SUBOPTIMAL_KHR)) 
         {
-            vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-            VkResult result = vkAcquireNextImageKHR(device, vulkanSwapChain->swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
-            if ((result == VK_ERROR_OUT_OF_DATE_KHR) || (result == VK_SUBOPTIMAL_KHR)) 
-            {
-                _WindowResize();
-            }
-            else 
-            {
-                VK_CHECK_RESULT(result)
-            }
+            _WindowResize();
+        }
+        else 
+        {
+            VK_CHECK_RESULT(result)
         }
 
         VK_CHECK_RESULT(vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo))
@@ -846,7 +843,7 @@ namespace Palette
     //        throw std::runtime_error("failed to create pipeline layout!");
     //    }
 
-    //    // temp
+    //    // tempCode
     //    Entity* entity = new Entity();
     //    ModelComponent* model = entity->AddComponent<ModelComponent>();
     //    //PaletteGlobal::client->GetWorld()->AddEntity(entity);
@@ -861,7 +858,7 @@ namespace Palette
 
     //    switch (model->GetModelRenderer()->GetMeshes()->GetVertexRenderData().m_VertexFormat)
     //    {
-    //    case VertexFormat::VERTEX_P2_C3_T2:
+    //    case VertexFormat::VERTEX_P2_C3_U2:
     //        bindingDescription = Vertex_P2_C3_T2::GetBindingDescription();
     //        attributeDescriptions = Vertex_P2_C3_T2::GetAttributeDescriptions();
     //        break;

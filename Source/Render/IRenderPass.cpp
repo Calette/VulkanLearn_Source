@@ -116,9 +116,10 @@ namespace Palette
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
+        // tempCode
         VkVertexInputBindingDescription bindingDescription;
         std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
-        GetVertexInputDescriptions(VertexFormat::VERTEX_P2_C3_T2, bindingDescription, attributeDescriptions);
+        GetVertexInputDescriptions(VertexFormat::VERTEX_P2_C3_U2, bindingDescription, attributeDescriptions);
 
         vertexInputInfo.vertexBindingDescriptionCount = 0;
         vertexInputInfo.vertexAttributeDescriptionCount = 0;
@@ -134,7 +135,7 @@ namespace Palette
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         pipelineInfo.stageCount = 2;
-        pipelineInfo.pStages = shader->GetShaderModule(0)->GetShaderStages();
+        pipelineInfo.pStages = shader->GetShaderModule()->GetShaderStages();
         pipelineInfo.pVertexInputState = &vertexInputInfo;
         pipelineInfo.pInputAssemblyState = &inputAssembly;
         pipelineInfo.pViewportState = &viewportState;

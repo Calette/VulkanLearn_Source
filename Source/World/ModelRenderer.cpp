@@ -25,7 +25,7 @@ namespace Palette
 		size_t bufferSize = sizeof(Vertex_P2_C3_T2) * vertices.size();
 		verticesData.resize(bufferSize);
 		memcpy(verticesData.data(), vertices.data(), bufferSize);
-		VertexFormat vertexFormat = VertexFormat::VERTEX_P2_C3_T2;
+		VertexFormat vertexFormat = VertexFormat::VERTEX_P2_C3_U2;
 
 		VertexRenderData vertexData = { vertexFormat, verticesData, vertices.size() };
 
@@ -35,11 +35,11 @@ namespace Palette
 
 	ModelRenderer::~ModelRenderer()
 	{
-		for (auto mat : m_Materials)
-		{
-			for (auto shader : mat->GetShaders())
-				shader->RealeaseAllShaderModule();
-		}
+		//for (auto mat : m_Materials)
+		//{
+		//	for (auto shader : mat->GetShaders())
+		//		shader->RealeaseAllShaderModule();
+		//}
 
 		//m_Meshes.clear();
 	}

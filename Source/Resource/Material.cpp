@@ -44,8 +44,6 @@ namespace Palette
 		if (!DefualtMat)
 		{
 			DefualtMat = Material(new MaterialResource(ShaderResource::GetDefaultShader()));
-			// always keep default mat
-			//DefualtMat->AddRef();
 		}
 		return DefualtMat;
 	}

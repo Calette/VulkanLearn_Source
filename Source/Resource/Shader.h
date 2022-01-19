@@ -9,6 +9,7 @@
 #include "Common/IPtr.h"
 #include "Resourse.h"
 #include "Render/Shader/ShaderDeclaration.h"
+#include "Render/Mesh/VertexInputBindingDescription.h"
 
 namespace Palette
 {
@@ -81,7 +82,7 @@ namespace Palette
 
 		static Shader GetDefaultShader();
 
-		IShaderModule GetShaderModule(uint32_t defineHash);
+		IShaderModule GetShaderModule();
 
 		VkPipeline& GetPipeline() { return m_Pipeline; }
 
@@ -91,9 +92,7 @@ namespace Palette
 
 		void FinishCreatePipeline() { m_HasPipeline = true; }
 
-		void RealeaseAllShaderModule();
-
-		void RealeaseShaderModule(uint32_t defineHash);
+		void RealeaseShaderModule();
 
 	protected:
 		void _ReloadShader(uint32_t newTimeStamp);
@@ -101,9 +100,9 @@ namespace Palette
 	protected:
 		std::string					m_Name;
 		// different define / passFlag
-		std::unordered_map<uint32_t, IShaderModule>	m_ShaderModules;
+		IShaderModule				m_ShaderModules;
 
-		static const std::string	DEFUALT_SHADE_RPATH;
+		static const std::string	DEFUALTSHADERPATH;
 		static Shader				defaultShader;
 
 		bool						m_HasPipeline	= false;
@@ -112,5 +111,6 @@ namespace Palette
 		std::string					m_SourcePath;
 		ShaderType					m_Type;
 		uint32_t					m_TimeStamp;
+		VertexFormat				m_VertexFormat;
 	};
 }

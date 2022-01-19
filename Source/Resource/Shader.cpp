@@ -90,14 +90,12 @@ namespace Palette
         
     }
 
-    const std::string ShaderResource::DEFUALT_SHADE_RPATH = "triangle.shader";
+    const std::string ShaderResource::DEFUALTSHADERPATH = "triangle.shader";
     Shader ShaderResource::defaultShader = nullptr;
 
     ShaderResource::~ShaderResource()
     {
-        // todo ÓÐ±¨´í
-        //vkDestroyPipeline(PaletteGlobal::device, m_Pipeline, nullptr);
-        m_ShaderModules.clear();
+        vkDestroyPipeline(PaletteGlobal::device, m_Pipeline, nullptr);
     }
 
     ShaderResource::ShaderResource(const std::string& path)
@@ -114,8 +112,7 @@ namespace Palette
             m_Type = ShaderType::VertexPixel;
             try
             {
-                IShaderModule shaderModule = IShaderModule(new VertexPixelShaderModule(path, m_Name));
-                m_ShaderModules.emplace(0u, shaderModule);
+                m_ShaderModules = IShaderModule(new VertexPixelShaderModule(path, m_Name));
             }
             catch (const std::exception&)
             {
@@ -128,8 +125,7 @@ namespace Palette
             m_Type = ShaderType::Compute;
             try
             {
-                IShaderModule shaderModule = IShaderModule(new ComputeShaderModule(path, m_Name));
-                m_ShaderModules.emplace(0u, shaderModule);
+                m_ShaderModules = IShaderModule(new ComputeShaderModule(path, m_Name));
             }
             catch (const std::exception&)
             {
@@ -142,6 +138,7 @@ namespace Palette
             m_Type = ShaderType::None;
         }
 
+        // tempCode
         m_PassType = PassType::SimplePass;
     }
 
@@ -149,32 +146,27 @@ namespace Palette
     {
         if (!defaultShader)
         {
-            defaultShader = Shader(new ShaderResource(DEFUALT_SHADE_RPATH));
+            defaultShader = Shader(new ShaderResource(DEFUALTSHADERPATH));
         }
         return defaultShader;
     }
 
-    IShaderModule ShaderResource::GetShaderModule(uint32_t defineHash)
+    IShaderModule ShaderResource::GetShaderModule()
     {
         if (m_Type == ShaderType::None)
         {
             auto shader = GetDefaultShader();
             if (shader->m_Type != ShaderType::None)
-                return shader->GetShaderModule(0);
+                return shader->GetShaderModule();
             else
                 throw std::runtime_error("defaultShader fails to load");
         }
-        return m_ShaderModules[defineHash];
+        return m_ShaderModules;
     }
 
-    void ShaderResource::RealeaseShaderModule(uint32_t defineHash)
+    void ShaderResource::RealeaseShaderModule()
     {
-        m_ShaderModules.erase(m_ShaderModules.find(defineHash));
-    }
-
-    void ShaderResource::RealeaseAllShaderModule()
-    {
-        m_ShaderModules.clear();
+        //m_ShaderModules->ReleaseRef();
     }
 
     void ShaderResource::_ReloadShader(uint32_t newTimeStamp)
