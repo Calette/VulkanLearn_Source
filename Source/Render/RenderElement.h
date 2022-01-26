@@ -15,6 +15,8 @@ namespace Palette
 	void DrawMesh(RenderMesh mesh, Material mat);
 	void DrawMeshInstance(RenderMesh mesh, Material mat);
 
-	void DrawElement(VkCommandBuffer& cmd, IRenderPass* pass, RenderElement* element);
-	void DrawElementInstance(VkCommandBuffer& cmd, IRenderPass* pass, RenderElement* element);
+	bool PrepareElement_rt(RenderElement* element, IRenderPass* pass);
+
+	void DrawElement_rt(VkCommandBuffer& cmd, IRenderPass* pass, RenderElement* element);
+	void DrawElementInstance_rt(VkCommandBuffer& cmd, IRenderPass* pass, RenderElement* element);
 }

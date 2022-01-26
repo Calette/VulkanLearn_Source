@@ -5,7 +5,7 @@ namespace Palette
 {
 	enum class ShaderType
 	{
-		VertexPixel,
+		VertexFrag,
 		Compute,
 		None
 	};

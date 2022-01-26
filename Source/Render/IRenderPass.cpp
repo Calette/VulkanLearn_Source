@@ -104,6 +104,8 @@ namespace Palette
         colorBlending.blendConstants[2] = 0.0f;
         colorBlending.blendConstants[3] = 0.0f;
 
+        // todo
+        // 应该还要加各种constant buffer
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = 1;
@@ -153,7 +155,7 @@ namespace Palette
         VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &shader->GetPipeline()))
     }
 
-    void SetFrameBuffer(IRenderPass* renderPass)
+    void InitFrameBuffer(IRenderPass* renderPass)
     {
         //VkFramebuffer framebuffer = renderPass->GetFramebuffer();
         //VkExtent2D extent = renderPass->GetExtent();
@@ -186,8 +188,8 @@ namespace Palette
 
     IRenderPass::IRenderPass()
         : m_info()
-        , m_Cmd(VK_NULL_HANDLE)
-        , m_FrameBuffer(VK_NULL_HANDLE)
+        , m_CommandBuffer(VK_NULL_HANDLE)
+        , m_Framebuffer(VK_NULL_HANDLE)
     {
         m_info.format = VK_FORMAT_B8G8R8A8_SRGB;
 
@@ -209,14 +211,15 @@ namespace Palette
         m_Elements.clear();
         m_Effective = false;
         m_FinalOutput = false;
+        m_DescriptorSets.clear();
 
-        m_DescriptorSet = &GlobalConstantBuffer::Instance()->GetDescriptorSet();
+        m_DescriptorSets.push_back(GlobalConstantBuffer::Instance()->GetDescriptorSet());
     }
 
     void IRenderPass::Initialize(VkCommandBuffer& cmd)
     {
-        m_Cmd = cmd;
-        SetFrameBuffer(this);
+        m_CommandBuffer = cmd;
+        InitFrameBuffer(this);
         BeginRenderPass(this);
     }
 
@@ -224,17 +227,19 @@ namespace Palette
     {
         for (auto element : m_Scene->GetElements())
         {
-            DrawElement(m_Cmd, this, element);
+            if(PrepareElement_rt(element, this))
+                DrawElement_rt(m_CommandBuffer, this, element);
         }
 
         for (auto element : m_Elements)
         {
-            DrawElement(m_Cmd, this, element);
+            if (PrepareElement_rt(element, this))
+                DrawElement_rt(m_CommandBuffer, this, element);
         }
     }
 
     void IRenderPass::FinishRender()
     {
-        vkCmdEndRenderPass(m_Cmd);
+        vkCmdEndRenderPass(m_CommandBuffer);
     }
 }

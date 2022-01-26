@@ -9,6 +9,7 @@
 #include "Common/IPtr.h"
 #include "Resourse.h"
 #include "Render/Shader/ShaderDeclaration.h"
+#include "Render/Shader/ShaderParameter.h"
 #include "Render/Mesh/VertexInputBindingDescription.h"
 
 namespace Palette
@@ -25,33 +26,36 @@ namespace Palette
 		virtual ~IShaderModuleResourse() {};
 		IShaderModuleResourse(const std::string& path);
 
-		void _CreateShaderModule(VkShaderModule& shaderModule, const std::vector<char>& code);
+		void _CreateShaderModule(VkShaderModule& shaderModule, const std::vector<uint32_t>& code);
 
 	protected:
 		std::string m_Name;
 		uint32_t m_PassFlag = 0u;
 	};
 
-	class VertexPixelShaderModule : public IShaderModuleResourse
+	class VertexFragShaderModule : public IShaderModuleResourse
 	{
 		friend class ShaderResource;
 
 	public:
-		~VertexPixelShaderModule() override;
+		~VertexFragShaderModule() override;
 		void OnRefDestroy() override;
 		VkPipelineShaderStageCreateInfo* GetShaderStages() override { return m_ShaderStages; }
 
 	protected:
-		VertexPixelShaderModule(const std::string& path, const std::string& name);
+		VertexFragShaderModule(const std::string& path, const std::string& name);
 
 		void _CreatePipelineShaderStage();
 
 	protected:
 		std::string m_Vert_SPIR_V_Path;
-		std::string m_Pixel_SPIR_V_Path;
+		std::string m_Frag_SPIR_V_Path;
+
+		std::string m_Vert_GLSL_V_Path;
+		std::string m_Frag_GLSL_V_Path;
 
 		VkShaderModule m_VertShaderModule;
-		VkShaderModule m_PixelShaderModule;
+		VkShaderModule m_FragShaderModule;
 		VkPipelineShaderStageCreateInfo m_ShaderStages[2];
 	};
 
@@ -67,7 +71,7 @@ namespace Palette
 		~ComputeShaderModule() override;
 		ComputeShaderModule(const std::string& path, const std::string& name);
 
-		void _CreatePipelineShaderStage(VkShaderModule* computeShaderModule);
+		void _CreatePipelineShaderStage(VkShaderModule computeShaderModule);
 
 	protected:
 		std::string m_Compute_SPIR_V_Path;
@@ -86,6 +90,10 @@ namespace Palette
 
 		VkPipeline& GetPipeline() { return m_Pipeline; }
 
+		std::string& GetName() { return m_Name; }
+
+		std::string& GetSourcePath() { return m_SourcePath; }
+
 		PassType GetPassType() { return m_PassType; }
 
 		bool HasPipeline() { return m_HasPipeline; }
@@ -98,19 +106,20 @@ namespace Palette
 		void _ReloadShader(uint32_t newTimeStamp);
 
 	protected:
-		std::string					m_Name;
+		std::string						m_Name;
 		// different define / passFlag
-		IShaderModule				m_ShaderModules;
+		IShaderModule					m_ShaderModules;
 
-		static const std::string	DEFUALTSHADERPATH;
-		static Shader				defaultShader;
+		static const std::string		DEFUALTSHADERPATH;
+		static Shader					defaultShader;
 
-		bool						m_HasPipeline	= false;
-		PassType					m_PassType;
-		VkPipeline					m_Pipeline;
-		std::string					m_SourcePath;
-		ShaderType					m_Type;
-		uint32_t					m_TimeStamp;
-		VertexFormat				m_VertexFormat;
+		bool							m_HasPipeline	= false;
+		PassType						m_PassType;
+		VkPipeline						m_Pipeline;
+		std::string						m_SourcePath;
+		ShaderType						m_Type;
+		uint32_t						m_TimeStamp;
+		VertexFormat					m_VertexFormat;
+		std::vector<ShaderParameter>	m_Parameters;
 	};
 }

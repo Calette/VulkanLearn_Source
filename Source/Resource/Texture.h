@@ -13,10 +13,10 @@ namespace Palette
 		void CreateTextureSampler();
 
 	protected:
-		float GetMaxSamplerAnisotropy();
+		static float GetMaxSamplerAnisotropy();
 
 	protected:
-		float maxSamplerAnisotropy = 0.0f;
+		static float maxSamplerAnisotropy;
 
 		VkImage textureImage;
 		VkDeviceMemory textureImageMemory;

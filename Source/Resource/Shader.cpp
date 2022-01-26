@@ -6,6 +6,7 @@
 #include "../Render/Vulkan/VulkanGlobal.h"
 #include "../Render/Mesh/VertexInputBindingDescription.h"
 #include "Render/Vulkan/VulkanCommon.h"
+#include "Render/Shader/ShaderCompiler.h"
 
 namespace Palette
 {
@@ -14,44 +15,49 @@ namespace Palette
 
     }
 
-    void IShaderModuleResourse::_CreateShaderModule(VkShaderModule& shaderModule, const std::vector<char>& code)
+    void IShaderModuleResourse::_CreateShaderModule(VkShaderModule& shaderModule, const std::vector<uint32_t>& code)
     {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        createInfo.codeSize = code.size();
+        createInfo.codeSize = code.size() * sizeof(uint32_t);
         createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
         VK_CHECK_RESULT(vkCreateShaderModule(PaletteGlobal::device, &createInfo, nullptr, &shaderModule))
     }
 
-    VertexPixelShaderModule::~VertexPixelShaderModule()
+    VertexFragShaderModule::~VertexFragShaderModule()
     {
 
     }
 
-    void VertexPixelShaderModule::OnRefDestroy()
+    void VertexFragShaderModule::OnRefDestroy()
     {
         vkDestroyShaderModule(PaletteGlobal::device, m_VertShaderModule, nullptr);
-        vkDestroyShaderModule(PaletteGlobal::device, m_PixelShaderModule, nullptr);
+        vkDestroyShaderModule(PaletteGlobal::device, m_FragShaderModule, nullptr);
     }
 
-    VertexPixelShaderModule::VertexPixelShaderModule(const std::string& path, const std::string& name)
+    VertexFragShaderModule::VertexFragShaderModule(const std::string& path, const std::string& name)
         : IShaderModuleResourse(path)
     {
-        //...×ª³ÉSpir_v
+        m_Vert_GLSL_V_Path = GetShaderPath() + "Shaders/GLSL/" + name + ".vert";
+        m_Frag_GLSL_V_Path = GetShaderPath() + "Shaders/GLSL/" + name + ".frag";
 
-        //m_Vert_SPIR_V_Path = SHADERPATH + "SPIR-V/" + name + "_vert.spv";
-        //m_Pixel_SPIR_V_Path = SHADERPATH + "SPIR-V/" + name + "_pixel.spv";
-        m_Vert_SPIR_V_Path = "Shaders/SPIR-V/" + name + "_vert.spv";
-        m_Pixel_SPIR_V_Path = "Shaders/SPIR-V/" + name + "_pixel.spv";
+        std::vector<std::uint32_t> vert_spirv;
+        std::vector<std::uint32_t> frag_spirv;
+        GLSLCompiler::Instance()->Load_Shader(m_Vert_GLSL_V_Path, vert_spirv);
+        GLSLCompiler::Instance()->Load_Shader(m_Frag_GLSL_V_Path, frag_spirv);
 
-        _CreateShaderModule(m_VertShaderModule, ReadFile(m_Vert_SPIR_V_Path));
-        _CreateShaderModule(m_PixelShaderModule, ReadFile(m_Pixel_SPIR_V_Path));
+        // todo cache
+        m_Vert_SPIR_V_Path = GetShaderPath() + "Shaders/SPIR-V/" + name + "_vert.spv";
+        m_Frag_SPIR_V_Path = GetShaderPath() + "Shaders/SPIR-V/" + name + "_frag.spv";
+
+        _CreateShaderModule(m_VertShaderModule, vert_spirv);
+        _CreateShaderModule(m_FragShaderModule, frag_spirv);
 
         _CreatePipelineShaderStage();
     }
 
-    void VertexPixelShaderModule::_CreatePipelineShaderStage()
+    void VertexFragShaderModule::_CreatePipelineShaderStage()
     {
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
         vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -62,7 +68,7 @@ namespace Palette
         VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
         fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        fragShaderStageInfo.module = m_PixelShaderModule;
+        fragShaderStageInfo.module = m_FragShaderModule;
         fragShaderStageInfo.pName = "main";
 
         m_ShaderStages[0] = vertShaderStageInfo;
@@ -85,7 +91,7 @@ namespace Palette
 
     }
 
-    void ComputeShaderModule::_CreatePipelineShaderStage(VkShaderModule* computeShaderModule)
+    void ComputeShaderModule::_CreatePipelineShaderStage(VkShaderModule computeShaderModule)
     {
         
     }
@@ -109,10 +115,10 @@ namespace Palette
 
         if (ext.compare("shader") == 0)
         {
-            m_Type = ShaderType::VertexPixel;
+            m_Type = ShaderType::VertexFrag;
             try
             {
-                m_ShaderModules = IShaderModule(new VertexPixelShaderModule(path, m_Name));
+                m_ShaderModules = IShaderModule(new VertexFragShaderModule(path, m_Name));
             }
             catch (const std::exception&)
             {
@@ -140,6 +146,7 @@ namespace Palette
 
         // tempCode
         m_PassType = PassType::SimplePass;
+        //m_Parameters.push_back(ShaderParameter{})
     }
 
     Shader ShaderResource::GetDefaultShader()

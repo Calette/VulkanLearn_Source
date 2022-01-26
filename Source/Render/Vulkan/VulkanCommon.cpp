@@ -2,6 +2,15 @@
 
 namespace Palette
 {
+    const std::string GetShaderPath()
+    {
+#if defined(SHADER_DIR)
+        return SHADER_DIR;
+#else
+        return "";
+#endif
+    }
+
     std::string GetErrorString(VkResult errorCode)
     {
         switch (errorCode)

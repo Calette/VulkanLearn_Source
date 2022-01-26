@@ -9,10 +9,11 @@ namespace Palette
 	{
 		auto& entityList = PaletteGlobal::client->GetWorld()->GetEntityList();
 
+		// tempcode
 		if (entityList.size() == 0)
 		{
 			Entity* entity = new Entity();
-			ModelComponent* model = entity->AddComponent<ModelComponent>();
+			entity->AddComponent<ModelComponent>();
 			PaletteGlobal::client->GetWorld()->AddEntity(entity);
 		}
 

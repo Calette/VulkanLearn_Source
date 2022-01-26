@@ -10,6 +10,9 @@
 namespace Palette
 {
     using PaletteGlobal::device;
+
+    float Texture::maxSamplerAnisotropy = 0.0f;
+
     Texture::~Texture()
     {
         vkDestroySampler(device, textureSampler, nullptr);

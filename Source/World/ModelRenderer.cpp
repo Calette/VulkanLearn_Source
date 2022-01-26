@@ -27,7 +27,7 @@ namespace Palette
 		memcpy(verticesData.data(), vertices.data(), bufferSize);
 		VertexFormat vertexFormat = VertexFormat::VERTEX_P2_C3_U2;
 
-		VertexRenderData vertexData = { vertexFormat, verticesData, vertices.size() };
+		VertexRenderData vertexData = { vertexFormat, verticesData, static_cast<uint32_t>(vertices.size()) };
 
 		RenderMesh renderMesh = RenderMesh(new RenderMeshResourse(vertexData, indices));
 		m_Meshes.push_back(renderMesh);

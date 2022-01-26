@@ -30,7 +30,20 @@ namespace Palette
 		// 直接加到各个passd的m_Elements
 	}
 
-	void DrawElement(VkCommandBuffer& cmd, IRenderPass* pass, RenderElement* element)
+	bool PrepareElement_rt(RenderElement* element, IRenderPass* pass)
+	{
+		for (auto shader : element->Mat->GetShaders())
+		{
+			if (!shader->HasPipeline())
+			{
+				CreatePipeline(pass, shader);
+				shader->FinishCreatePipeline();
+			}
+		}
+		return true;
+	}
+
+	void DrawElement_rt(VkCommandBuffer& cmd, IRenderPass* pass, RenderElement* element)
 	{
 		for (auto shader : element->Mat->GetShaders())
 		{
@@ -38,11 +51,6 @@ namespace Palette
 			{
 				if (shader != RenderElement::PreRenderShader)
 				{
-					if (!shader->HasPipeline())
-					{
-						CreatePipeline(pass, shader);
-						shader->FinishCreatePipeline();
-					}
 					vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, shader->GetPipeline());
 				}
 
@@ -53,7 +61,13 @@ namespace Palette
 				vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
 				vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pass->GetPipelineLayout(), 0, 1, pass->GetDescriptorSet(), 0, nullptr);
+				std::vector<VkDescriptorSet>& descriptorSetList = pass->GetDescriptorSets();
+				VkDescriptorSet descriptorSet;
+				if (element->Mat->GetDescriptorSet(shader, descriptorSet))
+				{
+					descriptorSetList.push_back(descriptorSet);
+				}
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pass->GetPipelineLayout(), 0, descriptorSetList.size(), descriptorSetList.data(), 0, nullptr);
 
 				uint32_t indexDataSize = static_cast<uint32_t>(element->Mesh->GetIndexData().size());
 				vkCmdDrawIndexed(cmd, indexDataSize, 1, 0, 0, 0);
@@ -63,7 +77,7 @@ namespace Palette
 		}
 	}
 
-	void DrawElementInstance(VkCommandBuffer& cmd, RenderElement* element)
+	void DrawElementInstance_rt(VkCommandBuffer& cmd, RenderElement* element)
 	{
 
 	}

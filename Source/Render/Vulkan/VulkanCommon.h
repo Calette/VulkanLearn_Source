@@ -8,6 +8,8 @@
 
 namespace Palette
 {
+    const std::string GetShaderPath();
+
     std::string GetErrorString(VkResult errorCode);
 
 #define VK_CHECK_RESULT(f)          \

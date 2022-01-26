@@ -27,13 +27,13 @@ namespace Palette
 		_SetFinalPass(pass);
 		pass->SetEffective();
 		m_Passes.emplace_front(pass);
-		auto preNodes = pass->GetInputNodes();
+		auto& preNodes = pass->GetInputNodes();
 		while (preNodes.size() != 0)
 		{
 			pass = pass->GetInputNodes()[0];
 			pass->SetEffective();
 			m_Passes.emplace_front(pass);
-			auto preNodes = pass->GetInputNodes();
+			preNodes = pass->GetInputNodes();
 		}
 	}
 

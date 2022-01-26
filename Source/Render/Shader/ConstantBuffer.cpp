@@ -1,14 +1,113 @@
 #include "ConstantBuffer.h"
 #include "Render/Vulkan/VulkanCommon.h"
+#include "Render/Vulkan/VulkanGlobal.h"
 
 namespace Palette
 {
-	GlobalConstantBuffer::GlobalConstantBuffer()
+	using PaletteGlobal::device;
+	ConstantBuffer::ConstantBuffer()
 	{
 		_CreateDescriptorSetLayout();
 		_CreateUniformBuffers();
 		_CreateDescriptorPool();
 		_CreateDescriptorSets();
+	}
+
+	VkDescriptorSet& ConstantBuffer::GetDescriptorSet()
+	{ 
+		return m_DescriptorSets[PaletteGlobal::vulkanDevice->GetImageIndex()]; 
+	}
+
+	void ConstantBuffer::_CreateDescriptorSetLayout()
+	{
+		VkDescriptorSetLayoutBinding uboLayoutBinding{};
+		uboLayoutBinding.binding = 0;
+		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		uboLayoutBinding.descriptorCount = 1;
+		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+
+		VkDescriptorSetLayoutCreateInfo layoutInfo{};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		layoutInfo.bindingCount = 1;
+		layoutInfo.pBindings = &uboLayoutBinding;
+
+		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &m_DescriptorSetLayout))
+	}
+
+	void ConstantBuffer::_CreateUniformBuffers()
+	{
+		VkDeviceSize bufferSize = sizeof(GlobalConstant);
+
+		size_t size = PaletteGlobal::vulkanDevice->GetImageCount();
+		auto& uniformBuffers = m_UniformBuffers;
+		auto& uniformBuffersMemory = m_UniformBuffersMemory;
+		uniformBuffers.resize(size);
+		uniformBuffersMemory.resize(size);
+
+		for (size_t i = 0; i < size; i++)
+		{
+			CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+		}
+	}
+
+	void ConstantBuffer::_CreateDescriptorPool()
+	{
+		uint32_t size = PaletteGlobal::vulkanDevice->GetImageCount();
+
+		VkDescriptorPoolSize poolSize{};
+		poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSize.descriptorCount = size;
+
+		VkDescriptorPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.poolSizeCount = 1;
+		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.maxSets = size;
+
+		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_DescriptorPool))
+	}
+
+	void ConstantBuffer::_CreateDescriptorSets()
+	{
+		uint32_t size = PaletteGlobal::vulkanDevice->GetImageCount();
+
+		std::vector<VkDescriptorSetLayout> layouts(size, m_DescriptorSetLayout);
+		VkDescriptorSetAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = m_DescriptorPool;
+		allocInfo.descriptorSetCount = size;
+		allocInfo.pSetLayouts = layouts.data();
+
+		m_DescriptorSets.resize(size);
+		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, m_DescriptorSets.data()))
+
+		for (size_t i = 0; i < size; i++)
+		{
+			VkDescriptorBufferInfo bufferInfo{};
+			bufferInfo.buffer = m_UniformBuffers[i];
+			bufferInfo.offset = 0;
+			bufferInfo.range = sizeof(GlobalConstant);
+
+			VkWriteDescriptorSet descriptorWrite{};
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = m_DescriptorSets[i];
+			descriptorWrite.dstBinding = 0;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.pBufferInfo = &bufferInfo;
+			descriptorWrite.pImageInfo = nullptr; // Optional
+			descriptorWrite.pTexelBufferView = nullptr; // Optional
+
+			vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+		}
+	}
+
+	GlobalConstantBuffer::GlobalConstantBuffer()
+		: ConstantBuffer()
+	{
+
 	}
 
 	void GlobalConstantBuffer::ReleaseGlobalConstantBuffer()
@@ -46,93 +145,7 @@ namespace Palette
 
 		void* data;
 		VK_CHECK_RESULT(vkMapMemory(device, m_UniformBuffersMemory[index], 0, sizeof(ubo), 0, &data))
-		memcpy(data, &ubo, sizeof(ubo));
+			memcpy(data, &ubo, sizeof(ubo));
 		vkUnmapMemory(device, m_UniformBuffersMemory[index]);
-	}
-
-	void GlobalConstantBuffer::_CreateDescriptorSetLayout()
-	{
-		VkDescriptorSetLayoutBinding uboLayoutBinding{};
-		uboLayoutBinding.binding = 0;
-		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		uboLayoutBinding.descriptorCount = 1;
-		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
-
-		VkDescriptorSetLayoutCreateInfo layoutInfo{};
-		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.bindingCount = 1;
-		layoutInfo.pBindings = &uboLayoutBinding;
-
-		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &m_DescriptorSetLayout))
-	}
-
-	void GlobalConstantBuffer::_CreateUniformBuffers()
-	{
-		VkDeviceSize bufferSize = sizeof(GlobalConstant);
-
-		size_t size = PaletteGlobal::vulkanDevice->GetImageCount();
-		auto& uniformBuffers = m_UniformBuffers;
-		auto& uniformBuffersMemory = m_UniformBuffersMemory;
-		uniformBuffers.resize(size);
-		uniformBuffersMemory.resize(size);
-
-		for (size_t i = 0; i < size; i++)
-		{
-			CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
-		}
-	}
-
-	void GlobalConstantBuffer::_CreateDescriptorPool()
-	{
-		uint32_t size = PaletteGlobal::vulkanDevice->GetImageCount();
-
-		VkDescriptorPoolSize poolSize{};
-		poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSize.descriptorCount = size;
-
-		VkDescriptorPoolCreateInfo poolInfo{};
-		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.poolSizeCount = 1;
-		poolInfo.pPoolSizes = &poolSize;
-		poolInfo.maxSets = size;
-
-		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_DescriptorPool))
-	}
-
-	void GlobalConstantBuffer::_CreateDescriptorSets()
-	{
-		uint32_t size = PaletteGlobal::vulkanDevice->GetImageCount();
-
-		std::vector<VkDescriptorSetLayout> layouts(size, m_DescriptorSetLayout);
-		VkDescriptorSetAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allocInfo.descriptorPool = m_DescriptorPool;
-		allocInfo.descriptorSetCount = size;
-		allocInfo.pSetLayouts = layouts.data();
-
-		m_DescriptorSets.resize(size);
-		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, m_DescriptorSets.data()))
-
-		for (size_t i = 0; i < size; i++)
-		{
-			VkDescriptorBufferInfo bufferInfo{};
-			bufferInfo.buffer = m_UniformBuffers[i];
-			bufferInfo.offset = 0;
-			bufferInfo.range = sizeof(GlobalConstant);
-
-			VkWriteDescriptorSet descriptorWrite{};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = m_DescriptorSets[i];
-			descriptorWrite.dstBinding = 0;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptorWrite.descriptorCount = 1;
-			descriptorWrite.pBufferInfo = &bufferInfo;
-			descriptorWrite.pImageInfo = nullptr; // Optional
-			descriptorWrite.pTexelBufferView = nullptr; // Optional
-
-			vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
-		}
 	}
 }

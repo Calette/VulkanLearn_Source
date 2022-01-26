@@ -17,7 +17,7 @@ namespace Palette
 		delete mainScene;
 	}
 
-	void RenderPipeline::Pass_Update_rt()
+	void RenderPipeline::Update_rt()
 	{
 		RenderElement::PreRenderShader = nullptr;
 		mainScene->Reset();
@@ -41,7 +41,7 @@ namespace Palette
 			//return;
 		}
 
-		Pass_Update_rt();
+		Update_rt();
 
 		mainScene->SetCamera(Camera::MainCamera);
 		SceneCuller::Instance()->Culling(Camera::MainCamera, mainScene);

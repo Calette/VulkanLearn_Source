@@ -6,7 +6,7 @@ namespace Palette
 	class SimplePass : public IRenderPass
 	{
 	public:
-		SimplePass() { m_Type = PassType::SimplePass; }
+		SimplePass() { m_Name = "Simple Pass"; m_PassType = PassType::SimplePass; }
 		~SimplePass() {}
 
 		IRenderPass* Connect(IRenderPass* pass, RenderScene* scene);

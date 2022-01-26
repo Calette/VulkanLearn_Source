@@ -16,7 +16,7 @@ namespace Palette
 
 		Camera* GetCamera() const noexcept { return m_Camera; }
 		void SetCamera(Camera* newCamera) noexcept { m_Camera = newCamera; }
-		std::vector<RenderElement*> GetElements() const noexcept { return m_Elements; }
+		std::vector<RenderElement*>& GetElements() noexcept { return m_Elements; }
 	private:
 		Camera* m_Camera;
 		std::vector<RenderElement*> m_Elements;

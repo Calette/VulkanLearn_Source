@@ -1,6 +1,8 @@
 #pragma once
 #include "Shader.h"
 #include "Resourse.h"
+#include "Render/Shader/ConstantBuffer.h"
+#include "Render/Shader/ShaderParameter.h"
 
 namespace Palette
 {
@@ -22,7 +24,7 @@ namespace Palette
 		std::vector<Shader>& GetShaders() { return m_Shaders; }
 
 	protected:
-		std::vector<Shader> m_Shaders;
+		std::vector<Shader>	m_Shaders;
 	};
 
 	class MaterialResource : public IMaterial
@@ -35,12 +37,27 @@ namespace Palette
 		void OnRefDestroy() override;
 		
 		Material Copy();
+		bool GetDescriptorSet(Shader shader, VkDescriptorSet& descriptorSet);
 
 		static Material GetDefualtMat();
 		static void ReleaseDefualtMat();
 
+
+
 	protected:
-		static Material DefualtMat;
-		BlendMode m_BlendMode;
+		static Material	DefualtMat;
+		BlendMode		m_BlendMode;
+
+		struct KeyHasher
+		{
+			std::size_t operator()(const Shader s) const
+			{
+				return ((std::hash<std::string>()(s->GetName())
+					^ (std::hash<std::string>()(s->GetSourcePath()) << 1)) >> 1)
+					^ (std::hash<uint32_t>()((uint32_t)s->GetPassType()) << 1);
+			}
+		};
+		std::unordered_map<Shader, ConstantBuffer*, KeyHasher>	m_DescriptorSets;
+		std::vector<MaterialParameter>							m_Parameters;
 	};
 }

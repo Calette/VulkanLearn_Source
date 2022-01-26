@@ -1,5 +1,6 @@
-#include "VulkanUtilities.h"
+#include "Render/Vulkan/VulkanGlobal.h"
 #include "VulkanCommon.h"
+#include "VulkanUtilities.h"
 #include "VulkanCommandBuffer.h"
 
 namespace Palette
