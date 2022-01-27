@@ -8,7 +8,7 @@ namespace Palette
 {
 	class IRenderPass;
 
-	enum BlendMode
+	enum class BlendMode
 	{
 		BLEND_Opaque,
 		BLEND_Translucent
@@ -41,8 +41,6 @@ namespace Palette
 
 		static Material GetDefualtMat();
 		static void ReleaseDefualtMat();
-
-
 
 	protected:
 		static Material	DefualtMat;

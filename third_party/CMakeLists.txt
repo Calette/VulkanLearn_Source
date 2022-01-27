@@ -44,3 +44,15 @@ set_property(TARGET gmock PROPERTY FOLDER "ThirdParty")
 set_property(TARGET gmock_main PROPERTY FOLDER "ThirdParty")
 set_property(TARGET gtest PROPERTY FOLDER "ThirdParty")
 set_property(TARGET gtest_main PROPERTY FOLDER "ThirdParty")
+
+# spirv-cross
+add_subdirectory(spirv-cross)
+
+set_property(TARGET spirv-cross PROPERTY FOLDER "ThirdParty")
+set_property(TARGET spirv-cross-core PROPERTY FOLDER "ThirdParty")
+set_property(TARGET spirv-cross-glsl PROPERTY FOLDER "ThirdParty")
+set_property(TARGET spirv-cross-cpp PROPERTY FOLDER "ThirdParty")
+set_property(TARGET spirv-cross-hlsl PROPERTY FOLDER "ThirdParty")
+set_property(TARGET spirv-cross-msl PROPERTY FOLDER "ThirdParty")
+set_property(TARGET spirv-cross-reflect PROPERTY FOLDER "ThirdParty")
+set_property(TARGET spirv-cross-util PROPERTY FOLDER "ThirdParty")

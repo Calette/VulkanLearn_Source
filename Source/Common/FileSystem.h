@@ -19,7 +19,6 @@ namespace Palette
         file.seekg(0);
         file.read(buffer.data(), fileSize);
         file.close();
-
         return buffer;
     }
 }

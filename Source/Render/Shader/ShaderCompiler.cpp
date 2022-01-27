@@ -12,7 +12,7 @@ namespace Palette
 	glslang::EShTargetLanguage        GLSLCompiler::env_target_language = glslang::EShTargetLanguage::EShTargetNone;
 	glslang::EShTargetLanguageVersion GLSLCompiler::env_target_language_version = (glslang::EShTargetLanguageVersion)0;
 
-	EShLanguage Find_shader_stage(const std::string& ext)
+	static EShLanguage Find_shader_stage(const std::string& ext)
 	{
 		if (ext == "vert")
 		{
@@ -100,7 +100,7 @@ namespace Palette
 		shader.setEntryPoint(entry_point.c_str());
 		shader.setSourceEntryPoint(entry_point.c_str());
 
-		// tempCode
+		// todo
 		//shader.setPreamble(shader_variant.get_preamble().c_str());
 		//shader.addProcesses(shader_variant.get_processes());
 		shader.setPreamble("");
@@ -161,16 +161,13 @@ namespace Palette
 		return true;
 	}
 
-	bool GLSLCompiler::Load_Shader(const std::string& filePath, std::vector<std::uint32_t>& spirv)
+	bool GLSLCompiler::Load_Shader(const std::vector<char>& buffer, EShLanguage language, std::vector<std::uint32_t>& spirv)
 	{
-		auto buffer = ReadFile(filePath);
-		std::string file_ext = filePath.substr(filePath.find_last_of(".") + 1);
-
 		std::string info_log;
 		// Compile the GLSL source
-		if (!Compile_to_spirv(Find_shader_stage(file_ext), buffer, "main", spirv, info_log))
+		if (!Compile_to_spirv(language, buffer, "main", spirv, info_log))
 		{
-			printf("Failed to compile shader, Error: %s", info_log.c_str());
+			printf("Failed to compile shader , Error: %s", info_log.c_str());
 			return false;
 		}
 	}

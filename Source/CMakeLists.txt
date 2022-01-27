@@ -56,12 +56,14 @@ target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBS})
 #message(STATUS "!!!! ${CMAKE_BINARY_DIR}/third_party/glslang/SPIRV/Debug/SPIRVd.lib")
 target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/third_party/Debug/glslang-default-resource-limits.lib)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/third_party/glslang/SPIRV/Debug/SPIRVd.lib)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/third_party/SPIRV-Cross/Debug/spirv-cross-glsld.lib)
 
 # 依赖
 target_link_libraries(${PROJECT_NAME} PUBLIC
     glslang
 	glslang-default-resource-limits
-	SPIRV)
+	SPIRV
+	spirv-cross-glsl)
 
 if(${NEED_LINK_ATOMIC})
     target_link_libraries(${PROJECT_NAME} PUBLIC atomic)

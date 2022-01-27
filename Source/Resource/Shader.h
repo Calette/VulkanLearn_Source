@@ -24,7 +24,7 @@ namespace Palette
 
 	protected:
 		virtual ~IShaderModuleResourse() {};
-		IShaderModuleResourse(const std::string& path);
+		IShaderModuleResourse();
 
 		void _CreateShaderModule(VkShaderModule& shaderModule, const std::vector<uint32_t>& code);
 
@@ -45,14 +45,14 @@ namespace Palette
 	protected:
 		VertexFragShaderModule(const std::string& path, const std::string& name);
 
+		void _CreateShaderInfo(std::vector<std::uint32_t>& vert_spirv, std::vector<std::uint32_t>& frag_spirv);
 		void _CreatePipelineShaderStage();
 
 	protected:
 		std::string m_Vert_SPIR_V_Path;
 		std::string m_Frag_SPIR_V_Path;
 
-		std::string m_Vert_GLSL_V_Path;
-		std::string m_Frag_GLSL_V_Path;
+		std::string m_GLSL_Path;
 
 		VkShaderModule m_VertShaderModule;
 		VkShaderModule m_FragShaderModule;

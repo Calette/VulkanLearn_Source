@@ -1,6 +1,7 @@
 #include <fstream>
 
 #include "Shader.h"
+#include "spirv_cross.hpp"
 #include "../Common/FileSystem.h"
 #include "../Common/MD5.h"
 #include "../Render/Vulkan/VulkanGlobal.h"
@@ -10,7 +11,7 @@
 
 namespace Palette
 {
-    IShaderModuleResourse::IShaderModuleResourse(const std::string& path) 
+    IShaderModuleResourse::IShaderModuleResourse() 
     {
 
     }
@@ -36,16 +37,43 @@ namespace Palette
         vkDestroyShaderModule(PaletteGlobal::device, m_FragShaderModule, nullptr);
     }
 
-    VertexFragShaderModule::VertexFragShaderModule(const std::string& path, const std::string& name)
-        : IShaderModuleResourse(path)
+    static std::string GetConstantBufferStr(uint32_t binding, std::vector<char>& source)
     {
-        m_Vert_GLSL_V_Path = GetShaderPath() + "Shaders/GLSL/" + name + ".vert";
-        m_Frag_GLSL_V_Path = GetShaderPath() + "Shaders/GLSL/" + name + ".frag";
+        std::string str = "";
+        return str;
+    }
+
+    static void Parse(static std::vector<char>& buffer, static std::vector<char>& buffer_vert, static std::vector<char>& buffer_frag)
+    {
+        const std::string versionStr = "#version 460\n";
+
+        std::string mainStr = "";
+
+        std::string str;
+
+        buffer_vert = std::vector<char>(str.begin(), str.end());
+        buffer_frag = std::vector<char>(str.begin(), str.end());
+    }
+
+    VertexFragShaderModule::VertexFragShaderModule(const std::string& path, const std::string& name)
+        : IShaderModuleResourse()
+    {
+        std::string m_Vert_GLSL_Path = GetShaderPath() + "Shaders/GLSL/" + name + ".vert";
+        std::string m_Frag_GLSL_Path = GetShaderPath() + "Shaders/GLSL/" + name + ".frag";
+
+        m_GLSL_Path = GetShaderPath() + "Shaders/GLSL/" + name + ".shader";
+
+        // todo
+        ////auto buffer = ReadFile(m_GLSL_Path);
+        //Parse(buffer, buffer_vert, buffer_frag);
+
+        auto buffer_vert = ReadFile(m_Vert_GLSL_Path);
+        auto buffer_frag = ReadFile(m_Frag_GLSL_Path);
 
         std::vector<std::uint32_t> vert_spirv;
         std::vector<std::uint32_t> frag_spirv;
-        GLSLCompiler::Instance()->Load_Shader(m_Vert_GLSL_V_Path, vert_spirv);
-        GLSLCompiler::Instance()->Load_Shader(m_Frag_GLSL_V_Path, frag_spirv);
+        GLSLCompiler::Instance()->Load_Shader(buffer_vert, EShLangVertex, vert_spirv);
+        GLSLCompiler::Instance()->Load_Shader(buffer_frag, EShLangFragment, frag_spirv);
 
         // todo cache
         m_Vert_SPIR_V_Path = GetShaderPath() + "Shaders/SPIR-V/" + name + "_vert.spv";
@@ -55,6 +83,63 @@ namespace Palette
         _CreateShaderModule(m_FragShaderModule, frag_spirv);
 
         _CreatePipelineShaderStage();
+
+        _CreateShaderInfo(vert_spirv, frag_spirv);
+    }
+
+    static void GetShaderResourcesInfo(std::vector<std::uint32_t>& sourceCode)
+    {
+        spirv_cross::Compiler glsl(sourceCode);
+        // The SPIR-V is now parsed, and we can perform reflection on it.
+        spirv_cross::ShaderResources resources = glsl.get_shader_resources();
+
+        // Get all sampled images in the shader.
+        for (auto& resource : resources.sampled_images)
+        {
+
+        }
+
+        // Get all Uniform Buffer in the shader
+        for (auto& resource : resources.uniform_buffers)
+        {
+            unsigned set = glsl.get_decoration(resource.id, spv::DecorationDescriptorSet);
+            unsigned binding = glsl.get_decoration(resource.id, spv::DecorationBinding);
+
+            spirv_cross::SPIRType uniformBufferType = glsl.get_type(resource.type_id);
+            const std::string& varName = glsl.get_name(resource.id);
+            unsigned uniformBufferStructSize = glsl.get_declared_struct_size(uniformBufferType);
+
+            uint32_t member_count = uniformBufferType.member_types.size();
+            for (int i = 0; i < member_count; i++)
+            {
+                std::cout<<glsl.get_member_name(resource.base_type_id, i)<<std::endl;
+            }
+        }
+
+        // Get all sampled images in the shader.
+        for (auto& resource : resources.storage_buffers)
+        {
+
+        }
+
+        for (auto& resource : resources.storage_images)
+        {
+
+        }
+    }
+
+    void VertexFragShaderModule::_CreateShaderInfo(std::vector<std::uint32_t>& vert_spirv, std::vector<std::uint32_t>& frag_spirv)
+    {
+        // todo get spirv_cross::ShaderResources
+        try 
+        {
+            GetShaderResourcesInfo(vert_spirv);
+        }
+        catch (const spirv_cross::CompilerError& e) 
+        {
+            std::cout << (e.what());
+            abort();
+        }
     }
 
     void VertexFragShaderModule::_CreatePipelineShaderStage()
@@ -81,7 +166,7 @@ namespace Palette
     }
 
     ComputeShaderModule::ComputeShaderModule(const std::string& path, const std::string& name)
-        : IShaderModuleResourse(path)
+        : IShaderModuleResourse()
     {
         
     }
@@ -120,10 +205,10 @@ namespace Palette
             {
                 m_ShaderModules = IShaderModule(new VertexFragShaderModule(path, m_Name));
             }
-            catch (const std::exception&)
+            catch (const std::exception& e)
             {
                 m_Type = ShaderType::None;
-                printf("can not find the shader file : s% : ", m_Name.c_str());
+                printf("can not find the shader file : s% : s%", m_Name.c_str(), e.what());
             }
         }
         else if (ext.compare("compute") == 0)
@@ -133,10 +218,10 @@ namespace Palette
             {
                 m_ShaderModules = IShaderModule(new ComputeShaderModule(path, m_Name));
             }
-            catch (const std::exception&)
+            catch (const std::exception& e)
             {
                 m_Type = ShaderType::None;
-                printf("can not find the shader file : s% : ", m_Name.c_str());
+                printf("can not find the shader file : s% : s%", m_Name.c_str(), e.what());
             }
         }
         else

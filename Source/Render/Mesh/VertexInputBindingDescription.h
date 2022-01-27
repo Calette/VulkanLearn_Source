@@ -20,6 +20,7 @@ namespace Palette
 	enum class VertexFormat
 	{
 		VERTEX_COMMON_P3_U2 = 0b00101,
+		VERTEX_COMMON_P3_U2_C3 = 0b01101,
 		VERTEX_COMMON = 0b11111,
 		VERTEX_P2_C3_U2
 	};

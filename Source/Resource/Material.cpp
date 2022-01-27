@@ -30,12 +30,16 @@ namespace Palette
 		: IMaterial()
 	{
 		m_Shaders.emplace_back(shader);
+
+
 	}
 
 	Material MaterialResource::Copy()
 	{
 		MaterialResource* copyMat = new MaterialResource();
 		copyMat->m_Shaders = m_Shaders;
+		copyMat->m_BlendMode = m_BlendMode;
+		copyMat->m_Parameters = m_Parameters;
 		return Material(copyMat);
 	}
 

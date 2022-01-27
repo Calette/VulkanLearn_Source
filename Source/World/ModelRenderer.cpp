@@ -5,9 +5,11 @@ namespace Palette
 {
 	ModelRenderer::ModelRenderer()
 	{
+		// tempCode
 		Material mat = MaterialResource::GetDefualtMat();
 		m_Materials.push_back(mat);
 
+		// Mesh1
 		std::vector<Vertex_P2_C3_T2> vertices =
 		{
 			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
@@ -31,17 +33,31 @@ namespace Palette
 
 		RenderMesh renderMesh = RenderMesh(new RenderMeshResourse(vertexData, indices));
 		m_Meshes.push_back(renderMesh);
+
+		m_Materials.push_back(mat);
+
+		// Mesh2
+		std::vector<Vertex_P2_C3_T2> vertices2 =
+		{
+			{{-0.0f, -0.0f}, {1.0f, 0.0f, 0.0f}, {.5f, 0.0f}},
+			{{0.75f, -0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+			{{0.75f, 0.75f}, {0.0f, 0.0f, 1.0f}, {0.0f, .5f}},
+			{{-0.0f, 0.75f}, {1.0f, 1.0f, 1.0f}, {.5f, .5f}}
+		};
+
+		std::vector<uint8_t> verticesData2;
+		verticesData2.resize(bufferSize);
+		memcpy(verticesData2.data(), vertices2.data(), bufferSize);
+
+		VertexRenderData vertexData2 = { vertexFormat, verticesData2, static_cast<uint32_t>(vertices2.size()) };
+
+		RenderMesh renderMesh2 = RenderMesh(new RenderMeshResourse(vertexData2, indices));
+		m_Meshes.push_back(renderMesh2);
 	}
 
 	ModelRenderer::~ModelRenderer()
 	{
-		//for (auto mat : m_Materials)
-		//{
-		//	for (auto shader : mat->GetShaders())
-		//		shader->RealeaseAllShaderModule();
-		//}
 
-		//m_Meshes.clear();
 	}
 
 	void ModelRenderer::AddPrimitive_rt(RenderScene* scene)

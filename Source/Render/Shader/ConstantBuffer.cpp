@@ -145,7 +145,7 @@ namespace Palette
 
 		void* data;
 		VK_CHECK_RESULT(vkMapMemory(device, m_UniformBuffersMemory[index], 0, sizeof(ubo), 0, &data))
-			memcpy(data, &ubo, sizeof(ubo));
+		memcpy(data, &ubo, sizeof(ubo));
 		vkUnmapMemory(device, m_UniformBuffersMemory[index]);
 	}
 }

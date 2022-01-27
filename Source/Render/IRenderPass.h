@@ -13,7 +13,7 @@ namespace Palette
 		VkFormat format;
 	};
 
-	void CreateDescriptorSetLayout(VkDescriptorSetLayout& descriptorSetLayout);
+	//void CreateDescriptorSetLayout(VkDescriptorSetLayout& descriptorSetLayout);
 	void CreateRenderPass(VkRenderPass& renderPass, const PassInfo& info);
 	void CreatePipeline(IRenderPass* pass, Shader shader);
 	void InitFrameBuffer(IRenderPass* renderPass);

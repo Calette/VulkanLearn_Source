@@ -26,7 +26,7 @@ namespace Palette
 	void Vertex_Common::GetBindingDescription(VkVertexInputBindingDescription& bindingDescription)
 	{
 		bindingDescription.binding = 0;
-		bindingDescription.stride = sizeof(Vertex_P2_C3_T2);
+		bindingDescription.stride = sizeof(Vertex_Common);
 		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 	}
 
@@ -47,12 +47,13 @@ namespace Palette
 		}
 		if ((int)vertexFormat & (int)VertexAtterbute::UV)
 		{
-			attributeDescriptions.push_back(VkVertexInputAttributeDescription({ location, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex_Common, uv) }));
+			attributeDescriptions.push_back(VkVertexInputAttributeDescription({ location, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex_Common, uv) }));
 			location++;
 		}
 		if ((int)vertexFormat & (int)VertexAtterbute::Color)
 		{
-			attributeDescriptions.push_back(VkVertexInputAttributeDescription({ location, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex_Common, color) }));
+			// todo VK_FORMAT_R8G8B8A8_UNORM
+			attributeDescriptions.push_back(VkVertexInputAttributeDescription({ location, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Vertex_Common, color) }));
 			location++;
 		}
 		if ((int)vertexFormat & (int)VertexAtterbute::Tangent)

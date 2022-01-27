@@ -45,6 +45,6 @@ namespace Palette
 			std::vector<std::uint32_t>& spirv,
 			std::string& info_log);
 
-		bool Load_Shader(const std::string& filePath, std::vector<std::uint32_t>& spirv);
+		bool Load_Shader(const std::vector<char>& buffer, EShLanguage language, std::vector<std::uint32_t>& spirv);
 	};
 }
