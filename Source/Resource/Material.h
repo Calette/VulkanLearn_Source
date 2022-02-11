@@ -37,7 +37,6 @@ namespace Palette
 		void OnRefDestroy() override;
 		
 		Material Copy();
-		bool GetDescriptorSet(Shader shader, VkDescriptorSet& descriptorSet);
 
 		static Material GetDefualtMat();
 		static void ReleaseDefualtMat();
@@ -46,16 +45,16 @@ namespace Palette
 		static Material	DefualtMat;
 		BlendMode		m_BlendMode;
 
-		struct KeyHasher
-		{
-			std::size_t operator()(const Shader s) const
-			{
-				return ((std::hash<std::string>()(s->GetName())
-					^ (std::hash<std::string>()(s->GetSourcePath()) << 1)) >> 1)
-					^ (std::hash<uint32_t>()((uint32_t)s->GetPassType()) << 1);
-			}
-		};
-		std::unordered_map<Shader, ConstantBuffer*, KeyHasher>	m_DescriptorSets;
+		//struct KeyHasher
+		//{
+		//	std::size_t operator()(const Shader s) const
+		//	{
+		//		return ((std::hash<std::string>()(s->GetName())
+		//			^ (std::hash<std::string>()(s->GetSourcePath()) << 1)) >> 1)
+		//			^ (std::hash<uint32_t>()((uint32_t)s->GetPassType()) << 1);
+		//	}
+		//};
+		//std::unordered_map<Shader, ConstantBuffer*, KeyHasher>	m_DescriptorSets;
 		std::vector<MaterialParameter>							m_Parameters;
 	};
 }

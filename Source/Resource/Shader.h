@@ -11,14 +11,23 @@
 #include "Render/Shader/ShaderDeclaration.h"
 #include "Render/Shader/ShaderParameter.h"
 #include "Render/Mesh/VertexInputBindingDescription.h"
+#include "Render/Shader/ConstantBuffer.h"
 
 namespace Palette
 {
+	// 收集缓存没用到的shader变体？
+	class ShaderModuleManager : Singleton<ShaderModuleManager>
+	{
+
+	};
+
 	class IShaderModuleResourse : public IRef
 	{
 	public:
 		std::string GetName() const noexcept { return m_Name; }
 		uint32_t PassFlag() const noexcept { return m_PassFlag; }
+		std::vector<ShaderParameter>& GetShaderParameters() noexcept { return m_Parameters; }
+		std::vector<ConstantBuffer>& GetConstantBuffers() noexcept { return m_ConstantBuffers; }
 
 		virtual VkPipelineShaderStageCreateInfo* GetShaderStages() = 0;
 
@@ -29,8 +38,11 @@ namespace Palette
 		void _CreateShaderModule(VkShaderModule& shaderModule, const std::vector<uint32_t>& code);
 
 	protected:
-		std::string m_Name;
-		uint32_t m_PassFlag = 0u;
+		std::string	m_Name;
+		uint32_t	m_PassFlag = 0u;
+		std::vector<ShaderParameter>	m_Parameters;
+		std::vector<ConstantBuffer>		m_ConstantBuffers;
+		uint32_t	m_ConstantBufferCount;
 	};
 
 	class VertexFragShaderModule : public IShaderModuleResourse
@@ -120,6 +132,5 @@ namespace Palette
 		ShaderType						m_Type;
 		uint32_t						m_TimeStamp;
 		VertexFormat					m_VertexFormat;
-		std::vector<ShaderParameter>	m_Parameters;
 	};
 }

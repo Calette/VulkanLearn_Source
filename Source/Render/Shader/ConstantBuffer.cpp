@@ -5,10 +5,10 @@
 namespace Palette
 {
 	using PaletteGlobal::device;
-	ConstantBuffer::ConstantBuffer()
+	ConstantBuffer::ConstantBuffer(uint64_t bufferSize)
 	{
 		_CreateDescriptorSetLayout();
-		_CreateUniformBuffers();
+		_CreateUniformBuffers(bufferSize);
 		_CreateDescriptorPool();
 		_CreateDescriptorSets();
 	}
@@ -35,10 +35,8 @@ namespace Palette
 		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &m_DescriptorSetLayout))
 	}
 
-	void ConstantBuffer::_CreateUniformBuffers()
+	void ConstantBuffer::_CreateUniformBuffers(uint64_t bufferSize)
 	{
-		VkDeviceSize bufferSize = sizeof(GlobalConstant);
-
 		size_t size = PaletteGlobal::vulkanDevice->GetImageCount();
 		auto& uniformBuffers = m_UniformBuffers;
 		auto& uniformBuffersMemory = m_UniformBuffersMemory;
@@ -105,9 +103,12 @@ namespace Palette
 	}
 
 	GlobalConstantBuffer::GlobalConstantBuffer()
-		: ConstantBuffer()
 	{
-
+		VkDeviceSize bufferSize = sizeof(GlobalConstant);
+		_CreateDescriptorSetLayout();
+		_CreateUniformBuffers(bufferSize);
+		_CreateDescriptorPool();
+		_CreateDescriptorSets();
 	}
 
 	void GlobalConstantBuffer::ReleaseGlobalConstantBuffer()

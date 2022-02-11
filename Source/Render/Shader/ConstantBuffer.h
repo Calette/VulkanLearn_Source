@@ -18,14 +18,15 @@ namespace Palette
 	class ConstantBuffer
 	{
 	public:
-		ConstantBuffer();
+		ConstantBuffer() = default;
+		ConstantBuffer(uint64_t bufferSize);
 
 		VkDescriptorSetLayout& GetDescriptorSetLayout() { return m_DescriptorSetLayout; }
 		VkDescriptorSet& GetDescriptorSet();
 
 	protected:
 		void _CreateDescriptorSetLayout();
-		void _CreateUniformBuffers();
+		void _CreateUniformBuffers(uint64_t bufferSize);
 		void _CreateDescriptorPool();
 		void _CreateDescriptorSets();
 

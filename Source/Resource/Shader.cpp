@@ -87,11 +87,44 @@ namespace Palette
         _CreateShaderInfo(vert_spirv, frag_spirv);
     }
 
-    static void GetShaderResourcesInfo(std::vector<std::uint32_t>& sourceCode)
+    static ShaderParameterType SPIRTypeToShaderParameterType(spirv_cross::SPIRType spirType, size_t size)
     {
-        spirv_cross::Compiler glsl(sourceCode);
+        switch (spirType.basetype)
+        {
+        case spirv_cross::SPIRType::Boolean:
+            return ShaderParameterType::Boolean;
+        case spirv_cross::SPIRType::Int:
+            return ShaderParameterType::Integer;
+        case spirv_cross::SPIRType::Float:
+            switch (size)
+            {
+            case 4:
+                return ShaderParameterType::Float;
+            case 8:
+                return ShaderParameterType::Vector2;
+            case 12:
+                return ShaderParameterType::Vector3;
+            case 16:
+                return ShaderParameterType::Vector4;
+            case 64:
+                return ShaderParameterType::Matrix4x4;
+            default:
+                return ShaderParameterType::UnKnown;
+            }
+        case spirv_cross::SPIRType::Image:
+            return ShaderParameterType::Texture;
+        default:
+            return ShaderParameterType::UnKnown;
+        }
+    }
+
+    static void GetShaderResourcesInfo(std::vector<std::uint32_t>& sourceCode, VertexFragShaderModule* shaderModule)
+    {
+        spirv_cross::Compiler compiler(sourceCode);
         // The SPIR-V is now parsed, and we can perform reflection on it.
-        spirv_cross::ShaderResources resources = glsl.get_shader_resources();
+        spirv_cross::ShaderResources resources = compiler.get_shader_resources();
+
+        auto& paramters = shaderModule->GetShaderParameters();
 
         // Get all sampled images in the shader.
         for (auto& resource : resources.sampled_images)
@@ -102,21 +135,31 @@ namespace Palette
         // Get all Uniform Buffer in the shader
         for (auto& resource : resources.uniform_buffers)
         {
-            unsigned set = glsl.get_decoration(resource.id, spv::DecorationDescriptorSet);
-            unsigned binding = glsl.get_decoration(resource.id, spv::DecorationBinding);
+            unsigned set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+            unsigned binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
 
-            spirv_cross::SPIRType uniformBufferType = glsl.get_type(resource.type_id);
-            const std::string& varName = glsl.get_name(resource.id);
-            unsigned uniformBufferStructSize = glsl.get_declared_struct_size(uniformBufferType);
+            spirv_cross::SPIRType uniformBufferType = compiler.get_type(resource.type_id);
+            const std::string& uniformBufferName = compiler.get_name(resource.id);
+            printf("uniform_buffers : %s\n", uniformBufferName.c_str());
+            unsigned uniformBufferStructSize = compiler.get_declared_struct_size(uniformBufferType);
 
             uint32_t member_count = uniformBufferType.member_types.size();
-            for (int i = 0; i < member_count; i++)
+            for (uint32_t i = 0; i < member_count; i++)
             {
-                std::cout<<glsl.get_member_name(resource.base_type_id, i)<<std::endl;
+                auto& memberName = compiler.get_member_name(resource.base_type_id, i);
+                auto& memberType = compiler.get_type(uniformBufferType.member_types[i]);
+                auto memberSize = compiler.get_declared_struct_member_size(uniformBufferType, i);
+
+                paramters.push_back(ShaderParameter{
+                    memberName, 
+                    SPIRTypeToShaderParameterType(memberType, memberSize),
+                    binding });
+                printf("member : %s\n", memberName.c_str());
             }
+
+            //shaderModule->count++
         }
 
-        // Get all sampled images in the shader.
         for (auto& resource : resources.storage_buffers)
         {
 
@@ -133,7 +176,7 @@ namespace Palette
         // todo get spirv_cross::ShaderResources
         try 
         {
-            GetShaderResourcesInfo(vert_spirv);
+            GetShaderResourcesInfo(vert_spirv, this);
         }
         catch (const spirv_cross::CompilerError& e) 
         {
@@ -231,7 +274,6 @@ namespace Palette
 
         // tempCode
         m_PassType = PassType::SimplePass;
-        //m_Parameters.push_back(ShaderParameter{})
     }
 
     Shader ShaderResource::GetDefaultShader()

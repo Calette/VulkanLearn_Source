@@ -1,11 +1,21 @@
 #version 450
+// #extension GL_ARB_shading_language_include : enable
 
-layout(binding = 0) uniform UniformBufferObject 
+// include "test.h"
+
+layout(binding = 0) uniform GlobalUniformBuffer 
 {
     mat4 model;
     mat4 view;
     mat4 proj;
-} ubo;
+} gub;
+
+// layout(binding = 0) uniform ObjectUniformBuffer 
+// {
+//     mat4 model;
+//     mat4 view;
+//     mat4 proj;
+// } oub;
 
 // sturct AttributesTest
 // {
@@ -25,7 +35,7 @@ layout(location = 1) out vec2 fragTexCoord;
 
 void main() 
 {
-    gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 0.0, 1.0);
+    gl_Position = gub.proj * gub.view * gub.model * vec4(inPosition, 0.0, 1.0);
     fragColor = inColor;
 	fragTexCoord = inTexCoord;
 }

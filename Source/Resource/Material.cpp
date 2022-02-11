@@ -43,18 +43,6 @@ namespace Palette
 		return Material(copyMat);
 	}
 
-	bool MaterialResource::GetDescriptorSet(Shader shader, VkDescriptorSet& descriptorSet)
-	{ 
-		auto iter = m_DescriptorSets.find(shader);
-		if (iter == m_DescriptorSets.end())
-		{
-			return false;
-		}
-		descriptorSet = iter->second->GetDescriptorSet();
-		return true;
-	}
-
-
 	Material MaterialResource::GetDefualtMat()
 	{
 		if (!DefualtMat)

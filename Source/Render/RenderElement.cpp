@@ -62,10 +62,10 @@ namespace Palette
 				vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
 				std::vector<VkDescriptorSet>& descriptorSetList = pass->GetDescriptorSets();
-				VkDescriptorSet descriptorSet;
-				if (element->Mat->GetDescriptorSet(shader, descriptorSet))
+				auto& elementDescriptorSetList = shader->GetShaderModule()->GetConstantBuffers();
+				for(auto& descriptorSet : elementDescriptorSetList)
 				{
-					descriptorSetList.push_back(descriptorSet);
+					descriptorSetList.push_back(descriptorSet.GetDescriptorSet());
 				}
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pass->GetPipelineLayout(), 0, descriptorSetList.size(), descriptorSetList.data(), 0, nullptr);
 

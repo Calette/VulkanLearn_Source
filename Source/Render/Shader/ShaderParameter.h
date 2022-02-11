@@ -8,10 +8,13 @@ namespace Palette
 		Boolean,
 		Integer,
 		Float,
-		Vector,
+		Vector2,
+		Vector3,
+		Vector4,
 		Color,
-		Matrix,
-		Texture
+		Matrix4x4,
+		Texture,
+		UnKnown
 	};
 
 	struct MaterialParameter
@@ -24,6 +27,6 @@ namespace Palette
 	{
 		std::string name;
 		ShaderParameterType type;
-		int binding;
+		unsigned binding;
 	};
 }
