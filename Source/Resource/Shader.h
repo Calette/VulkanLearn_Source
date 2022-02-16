@@ -12,6 +12,7 @@
 #include "Render/Shader/ShaderParameter.h"
 #include "Render/Mesh/VertexInputBindingDescription.h"
 #include "Render/Shader/ConstantBuffer.h"
+#include "Common/PaletteCommon.h"
 
 namespace Palette
 {
@@ -27,21 +28,24 @@ namespace Palette
 		std::string GetName() const noexcept { return m_Name; }
 		uint32_t PassFlag() const noexcept { return m_PassFlag; }
 		std::vector<ShaderParameter>& GetShaderParameters() noexcept { return m_Parameters; }
-		std::vector<ConstantBuffer>& GetConstantBuffers() noexcept { return m_ConstantBuffers; }
+		std::vector<VkConstantBuffer*>& GetConstantBuffers() noexcept { return m_ConstantBuffers; }
 
 		virtual VkPipelineShaderStageCreateInfo* GetShaderStages() = 0;
 
+		GET(VkDescriptorSetLayout, DescriptorSetLayout)
+
 	protected:
-		virtual ~IShaderModuleResourse() {};
-		IShaderModuleResourse();
+		virtual ~IShaderModuleResourse() = default;
+		IShaderModuleResourse() = default;
 
 		void _CreateShaderModule(VkShaderModule& shaderModule, const std::vector<uint32_t>& code);
+		void _CreateDescriptorSet();
 
 	protected:
 		std::string	m_Name;
 		uint32_t	m_PassFlag = 0u;
 		std::vector<ShaderParameter>	m_Parameters;
-		std::vector<ConstantBuffer>		m_ConstantBuffers;
+		std::vector<VkConstantBuffer*>	m_ConstantBuffers;
 		uint32_t	m_ConstantBufferCount;
 	};
 
@@ -50,7 +54,7 @@ namespace Palette
 		friend class ShaderResource;
 
 	public:
-		~VertexFragShaderModule() override;
+		~VertexFragShaderModule() override = default;
 		void OnRefDestroy() override;
 		VkPipelineShaderStageCreateInfo* GetShaderStages() override { return m_ShaderStages; }
 
@@ -80,7 +84,7 @@ namespace Palette
 		void OnRefDestroy() override;
 
 	protected:
-		~ComputeShaderModule() override;
+		~ComputeShaderModule() override = default;
 		ComputeShaderModule(const std::string& path, const std::string& name);
 
 		void _CreatePipelineShaderStage(VkShaderModule computeShaderModule);
@@ -122,7 +126,7 @@ namespace Palette
 		// different define / passFlag
 		IShaderModule					m_ShaderModules;
 
-		static const std::string		DEFUALTSHADERPATH;
+		static const std::string		DEFAULTSHADERPATH;
 		static Shader					defaultShader;
 
 		bool							m_HasPipeline	= false;

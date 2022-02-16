@@ -38,7 +38,8 @@ namespace Palette
 		void SetFinalOutput() noexcept { m_FinalOutput = true; }
 
 		GETD(std::string, Name, "Default Pass")
-		GETD(PassType, PassType, PassType::DefualtPass)
+		GETD(PassType, PassType, defaultPass)
+		GETD(ConstantBufferType, ConstantBufferType, customConstant)
 
 		GET(std::vector<IRenderPass*>, InputNodes)
 
@@ -49,7 +50,6 @@ namespace Palette
 		GET(VkRenderPass, RenderPass)
 		GET(VkRenderPassBeginInfo, RenderPassBeginInfo)
 		GET(VkPipelineLayout, PipelineLayout)
-		GET(std::vector<VkDescriptorSet>, DescriptorSets)
 
 	protected:
 		bool							m_Effective		= false;

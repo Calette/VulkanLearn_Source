@@ -38,11 +38,11 @@ namespace Palette
 		
 		Material Copy();
 
-		static Material GetDefualtMat();
-		static void ReleaseDefualtMat();
+		static Material GetDefaultMat();
+		static void ReleaseDefaultMat();
 
 	protected:
-		static Material	DefualtMat;
+		static Material	DefaultMat;
 		BlendMode		m_BlendMode;
 
 		//struct KeyHasher
@@ -54,7 +54,7 @@ namespace Palette
 		//			^ (std::hash<uint32_t>()((uint32_t)s->GetPassType()) << 1);
 		//	}
 		//};
-		//std::unordered_map<Shader, ConstantBuffer*, KeyHasher>	m_DescriptorSets;
+		//std::unordered_map<Shader, VkConstantBuffer*, KeyHasher>	m_DescriptorSets;
 		std::vector<MaterialParameter>							m_Parameters;
 	};
 }

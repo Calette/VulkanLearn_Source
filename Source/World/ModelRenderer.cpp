@@ -6,7 +6,7 @@ namespace Palette
 	ModelRenderer::ModelRenderer()
 	{
 		// tempCode
-		Material mat = MaterialResource::GetDefualtMat();
+		Material mat = MaterialResource::GetDefaultMat();
 		m_Materials.push_back(mat);
 
 		// Mesh1

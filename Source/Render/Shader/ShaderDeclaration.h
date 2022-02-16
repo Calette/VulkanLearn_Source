@@ -5,25 +5,31 @@ namespace Palette
 {
 	enum class ShaderType
 	{
-		VertexFrag,
-		Compute,
-		None
+		vertexFrag,
+		compute,
+		none
 	};
 
-	enum class PassType
+	enum PassType
 	{
-		DefualtPass = 1,
-		SimplePass = 2,
+		defaultPass = 1,
+		simplePass = 2
 	};
 
-	enum class ConstantBufferType
+	enum ConstantBufferType
 	{
-		GlobalConstant
+		customConstant = 0,
+		globalConstant = 1
 	};
 
-	struct GlobalConstant
+	struct ConstantBuffer
 	{
-		glm::mat4 model;
+
+	};
+
+	struct GlobalConstant : public ConstantBuffer
+	{
+		//glm::mat4 model;
 		glm::mat4 view;
 		glm::mat4 proj;
 	};

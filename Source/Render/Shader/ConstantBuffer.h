@@ -8,45 +8,56 @@
 
 #include <chrono>
 #include <vector>
+#include <string>
 
 #include "Common/Singleton.h"
 #include "ShaderDeclaration.h"
 #include "Render/Vulkan/VulkanUtilities.h"
+#include "Common/PaletteCommon.h"
 
 namespace Palette
 {
-	class ConstantBuffer
+	class VkConstantBuffer
 	{
 	public:
-		ConstantBuffer() = default;
-		ConstantBuffer(uint64_t bufferSize);
+		VkConstantBuffer() = default;
+		virtual ~VkConstantBuffer();
+		VkConstantBuffer(uint64_t bufferSize, std::string name, unsigned binding, ConstantBufferType type);
 
-		VkDescriptorSetLayout& GetDescriptorSetLayout() { return m_DescriptorSetLayout; }
 		VkDescriptorSet& GetDescriptorSet();
+		virtual void UpdateUniformBuffer();
+		void CreateDescriptorSet(VkDescriptorSetLayout descriptorSetLayout);
+
+		GET(std::string, Name)
+		GET(unsigned, Binding)
+		GET(uint64_t, BufferSize)
+		GET(ConstantBufferType, Type)
 
 	protected:
-		void _CreateDescriptorSetLayout();
-		void _CreateUniformBuffers(uint64_t bufferSize);
+		void _CreateUniformBuffers();
 		void _CreateDescriptorPool();
-		void _CreateDescriptorSets();
 
 	protected:
 		VkDescriptorPool m_DescriptorPool;
-		VkDescriptorSetLayout m_DescriptorSetLayout;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
 
 		std::vector<VkBuffer>		m_UniformBuffers;
 		std::vector<VkDeviceMemory>	m_UniformBuffersMemory;
 	};
 
-	class GlobalConstantBuffer : public Singleton<GlobalConstantBuffer>, public ConstantBuffer
+	class GlobalConstantBuffer : public Singleton<GlobalConstantBuffer>
 	{
 	public:
 		GlobalConstantBuffer();
+		~GlobalConstantBuffer() = default;
 
-		void GetGlobalConstantBuffer(ConstantBufferType cbtype, GlobalConstant* data);
-		void ReleaseGlobalConstantBuffer();
+		ConstantBuffer GetGlobalConstantBuffer(ConstantBufferType cbtype);
+
+		ConstantBufferType GetConstantBufferType(const std::string& name);
 
 		void UpdateUniformBuffer();
+
+	private:
+		GlobalConstant m_GlobalConstant;
 	};
 }

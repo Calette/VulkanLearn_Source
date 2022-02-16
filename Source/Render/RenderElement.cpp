@@ -15,7 +15,7 @@ namespace Palette
 		{
 			switch (shader->GetPassType())
 			{
-			case PassType::SimplePass:
+			case simplePass:
 				//PaletteGlobal::client->GetRenderPipeline()
 				break;
 			default:
@@ -39,6 +39,12 @@ namespace Palette
 				CreatePipeline(pass, shader);
 				shader->FinishCreatePipeline();
 			}
+
+			auto& elementDescriptorSetList = shader->GetShaderModule()->GetConstantBuffers();
+			for (auto& descriptorSet : elementDescriptorSetList)
+			{
+				descriptorSet->UpdateUniformBuffer();
+			}
 		}
 		return true;
 	}
@@ -61,11 +67,11 @@ namespace Palette
 				vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
 				vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-				std::vector<VkDescriptorSet>& descriptorSetList = pass->GetDescriptorSets();
+				std::vector<VkDescriptorSet> descriptorSetList{};
 				auto& elementDescriptorSetList = shader->GetShaderModule()->GetConstantBuffers();
 				for(auto& descriptorSet : elementDescriptorSetList)
 				{
-					descriptorSetList.push_back(descriptorSet.GetDescriptorSet());
+					descriptorSetList.push_back(descriptorSet->GetDescriptorSet());
 				}
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pass->GetPipelineLayout(), 0, descriptorSetList.size(), descriptorSetList.data(), 0, nullptr);
 

@@ -17,10 +17,9 @@ namespace Palette
 
 	Client::~Client()
 	{
-		GlobalConstantBuffer::Instance()->ReleaseGlobalConstantBuffer();
 		delete renderPipeline;
 		delete world;
-		MaterialResource::ReleaseDefualtMat();
+		MaterialResource::ReleaseDefaultMat();
 		RenderElement::PreRenderShader->ReleaseRef();
 		ShaderResource::GetDefaultShader()->ReleaseRef();
 	}

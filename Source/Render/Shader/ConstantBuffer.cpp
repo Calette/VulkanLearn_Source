@@ -5,37 +5,60 @@
 namespace Palette
 {
 	using PaletteGlobal::device;
-	ConstantBuffer::ConstantBuffer(uint64_t bufferSize)
+	VkConstantBuffer::VkConstantBuffer(uint64_t bufferSize, std::string name, unsigned binding, ConstantBufferType type)
+		: m_Name(name), m_Binding(binding), m_BufferSize(bufferSize), m_Type(type)
 	{
-		_CreateDescriptorSetLayout();
-		_CreateUniformBuffers(bufferSize);
+		_CreateUniformBuffers();
 		_CreateDescriptorPool();
-		_CreateDescriptorSets();
 	}
 
-	VkDescriptorSet& ConstantBuffer::GetDescriptorSet()
-	{ 
-		return m_DescriptorSets[PaletteGlobal::vulkanDevice->GetImageIndex()]; 
-	}
-
-	void ConstantBuffer::_CreateDescriptorSetLayout()
+	VkConstantBuffer::~VkConstantBuffer()
 	{
-		VkDescriptorSetLayoutBinding uboLayoutBinding{};
-		uboLayoutBinding.binding = 0;
-		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		uboLayoutBinding.descriptorCount = 1;
-		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+		for (size_t i = 0; i < m_UniformBuffers.size(); i++)
+		{
+			vkDestroyBuffer(device, m_UniformBuffers[i], nullptr);
+			vkFreeMemory(device, m_UniformBuffersMemory[i], nullptr);
+		}
 
-		VkDescriptorSetLayoutCreateInfo layoutInfo{};
-		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.bindingCount = 1;
-		layoutInfo.pBindings = &uboLayoutBinding;
-
-		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &m_DescriptorSetLayout))
+		vkDestroyDescriptorPool(device, m_DescriptorPool, nullptr);
 	}
 
-	void ConstantBuffer::_CreateUniformBuffers(uint64_t bufferSize)
+	VkDescriptorSet& VkConstantBuffer::GetDescriptorSet()
+	{
+		return m_DescriptorSets[PaletteGlobal::vulkanDevice->GetImageIndex()];
+	}
+
+	void VkConstantBuffer::UpdateUniformBuffer()
+	{
+		uint32_t index = PaletteGlobal::vulkanDevice->GetImageIndex();
+		void* data;
+		ConstantBuffer cb;
+		switch (m_Type)
+		{
+		case globalConstant:
+			cb = GlobalConstantBuffer::Instance()->GetGlobalConstantBuffer(globalConstant);
+
+			VK_CHECK_RESULT(vkMapMemory(device, m_UniformBuffersMemory[index], 0, sizeof(cb), 0, &data))
+				memcpy(data, &cb, sizeof(cb));
+			vkUnmapMemory(device, m_UniformBuffersMemory[index]);
+			break;
+		default:
+			uint32_t index = PaletteGlobal::vulkanDevice->GetImageIndex();
+
+			static auto startTime = std::chrono::high_resolution_clock::now();
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+			glm::mat4 model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+			VK_CHECK_RESULT(vkMapMemory(device, m_UniformBuffersMemory[index], 0, sizeof(model), 0, &data))
+				memcpy(data, &model, sizeof(model));
+			vkUnmapMemory(device, m_UniformBuffersMemory[index]);
+			break;
+		}
+	}
+
+	void VkConstantBuffer::_CreateUniformBuffers()
 	{
 		size_t size = PaletteGlobal::vulkanDevice->GetImageCount();
 		auto& uniformBuffers = m_UniformBuffers;
@@ -45,14 +68,14 @@ namespace Palette
 
 		for (size_t i = 0; i < size; i++)
 		{
-			CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+			CreateBuffer(m_BufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
 		}
 	}
 
-	void ConstantBuffer::_CreateDescriptorPool()
+	void VkConstantBuffer::_CreateDescriptorPool()
 	{
 		uint32_t size = PaletteGlobal::vulkanDevice->GetImageCount();
-
+		size *= 2;
 		VkDescriptorPoolSize poolSize{};
 		poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		poolSize.descriptorCount = size;
@@ -66,16 +89,15 @@ namespace Palette
 		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_DescriptorPool))
 	}
 
-	void ConstantBuffer::_CreateDescriptorSets()
+	void VkConstantBuffer::CreateDescriptorSet(VkDescriptorSetLayout descriptorSetLayout)
 	{
 		uint32_t size = PaletteGlobal::vulkanDevice->GetImageCount();
-
-		std::vector<VkDescriptorSetLayout> layouts(size, m_DescriptorSetLayout);
+		std::vector<VkDescriptorSetLayout> layouts(size, descriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		allocInfo.descriptorPool = m_DescriptorPool;
 		allocInfo.descriptorSetCount = size;
-		allocInfo.pSetLayouts = layouts.data();
+		allocInfo.pSetLayouts = layouts.data();	
 
 		m_DescriptorSets.resize(size);
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, m_DescriptorSets.data()))
@@ -85,12 +107,12 @@ namespace Palette
 			VkDescriptorBufferInfo bufferInfo{};
 			bufferInfo.buffer = m_UniformBuffers[i];
 			bufferInfo.offset = 0;
-			bufferInfo.range = sizeof(GlobalConstant);
+			bufferInfo.range = m_BufferSize;
 
 			VkWriteDescriptorSet descriptorWrite{};
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descriptorWrite.dstSet = m_DescriptorSets[i];
-			descriptorWrite.dstBinding = 0;
+			descriptorWrite.dstBinding = m_Binding;
 			descriptorWrite.dstArrayElement = 0;
 			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			descriptorWrite.descriptorCount = 1;
@@ -104,29 +126,25 @@ namespace Palette
 
 	GlobalConstantBuffer::GlobalConstantBuffer()
 	{
-		VkDeviceSize bufferSize = sizeof(GlobalConstant);
-		_CreateDescriptorSetLayout();
-		_CreateUniformBuffers(bufferSize);
-		_CreateDescriptorPool();
-		_CreateDescriptorSets();
+
 	}
 
-	void GlobalConstantBuffer::ReleaseGlobalConstantBuffer()
+	ConstantBuffer GlobalConstantBuffer::GetGlobalConstantBuffer(ConstantBufferType cbtype)
 	{
-		for (size_t i = 0; i < m_UniformBuffers.size(); i++)
+		uint32_t type = (uint32_t)cbtype;
+		if (type & (uint32_t)ConstantBufferType::globalConstant)
 		{
-			vkDestroyBuffer(device, m_UniformBuffers[i], nullptr);
-			vkFreeMemory(device, m_UniformBuffersMemory[i], nullptr);
+			return m_GlobalConstant;
 		}
-
-		vkDestroyDescriptorPool(device, m_DescriptorPool, nullptr);
-
-		vkDestroyDescriptorSetLayout(device, m_DescriptorSetLayout, nullptr);
+		return ConstantBuffer{};
 	}
 
-	void GlobalConstantBuffer::GetGlobalConstantBuffer(ConstantBufferType cbtype, GlobalConstant* data)
+	ConstantBufferType GlobalConstantBuffer::GetConstantBufferType(const std::string& name)
 	{
-
+		if (name.compare("globalUniformBuffer"))
+			return globalConstant;
+		else
+			return customConstant;
 	}
 
 	void GlobalConstantBuffer::UpdateUniformBuffer()
@@ -134,19 +152,8 @@ namespace Palette
 		uint32_t index = PaletteGlobal::vulkanDevice->GetImageIndex();
 		auto& extent = PaletteGlobal::vulkanDevice->GetExtent2D();
 
-		static auto startTime = std::chrono::high_resolution_clock::now();
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-		GlobalConstant ubo{};
-		ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
-		ubo.proj[1][1] *= -1;
-
-		void* data;
-		VK_CHECK_RESULT(vkMapMemory(device, m_UniformBuffersMemory[index], 0, sizeof(ubo), 0, &data))
-		memcpy(data, &ubo, sizeof(ubo));
-		vkUnmapMemory(device, m_UniformBuffersMemory[index]);
+		m_GlobalConstant.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		m_GlobalConstant.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
+		m_GlobalConstant.proj[1][1] *= -1;
 	}
 }

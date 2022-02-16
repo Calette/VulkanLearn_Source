@@ -11,10 +11,7 @@
 
 namespace Palette
 {
-    IShaderModuleResourse::IShaderModuleResourse() 
-    {
-
-    }
+    using PaletteGlobal::device;
 
     void IShaderModuleResourse::_CreateShaderModule(VkShaderModule& shaderModule, const std::vector<uint32_t>& code)
     {
@@ -23,18 +20,22 @@ namespace Palette
         createInfo.codeSize = code.size() * sizeof(uint32_t);
         createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-        VK_CHECK_RESULT(vkCreateShaderModule(PaletteGlobal::device, &createInfo, nullptr, &shaderModule))
+        VK_CHECK_RESULT(vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule))
     }
 
-    VertexFragShaderModule::~VertexFragShaderModule()
+    void IShaderModuleResourse::_CreateDescriptorSet()
     {
-
+        for (auto cb : m_ConstantBuffers)
+        {
+            cb->CreateDescriptorSet(m_DescriptorSetLayout);
+        }
     }
 
     void VertexFragShaderModule::OnRefDestroy()
     {
-        vkDestroyShaderModule(PaletteGlobal::device, m_VertShaderModule, nullptr);
-        vkDestroyShaderModule(PaletteGlobal::device, m_FragShaderModule, nullptr);
+        vkDestroyShaderModule(device, m_VertShaderModule, nullptr);
+        vkDestroyShaderModule(device, m_FragShaderModule, nullptr);
+        vkDestroyDescriptorSetLayout(device, m_DescriptorSetLayout, nullptr);
     }
 
     static std::string GetConstantBufferStr(uint32_t binding, std::vector<char>& source)
@@ -85,6 +86,8 @@ namespace Palette
         _CreatePipelineShaderStage();
 
         _CreateShaderInfo(vert_spirv, frag_spirv);
+
+        _CreateDescriptorSet();
     }
 
     static ShaderParameterType SPIRTypeToShaderParameterType(spirv_cross::SPIRType spirType, size_t size)
@@ -118,13 +121,14 @@ namespace Palette
         }
     }
 
-    static void GetShaderResourcesInfo(std::vector<std::uint32_t>& sourceCode, VertexFragShaderModule* shaderModule)
+    static void GetShaderResourcesInfo(std::vector<std::uint32_t>& sourceCode, std::vector<VkDescriptorSetLayoutBinding>& descriptorSetLayoutBindings, VertexFragShaderModule* shaderModule, VkShaderStageFlags stageFlags)
     {
         spirv_cross::Compiler compiler(sourceCode);
         // The SPIR-V is now parsed, and we can perform reflection on it.
         spirv_cross::ShaderResources resources = compiler.get_shader_resources();
 
         auto& paramters = shaderModule->GetShaderParameters();
+        auto& cbs = shaderModule->GetConstantBuffers();
 
         // Get all sampled images in the shader.
         for (auto& resource : resources.sampled_images)
@@ -140,24 +144,39 @@ namespace Palette
 
             spirv_cross::SPIRType uniformBufferType = compiler.get_type(resource.type_id);
             const std::string& uniformBufferName = compiler.get_name(resource.id);
-            printf("uniform_buffers : %s\n", uniformBufferName.c_str());
+            size_t uniformBufferSize = compiler.get_declared_struct_size(uniformBufferType);
+            printf("[%d]uniform_buffers : %s, size : %d\n", binding, uniformBufferName.c_str(), uniformBufferSize);
             unsigned uniformBufferStructSize = compiler.get_declared_struct_size(uniformBufferType);
+            
+            auto cbType = GlobalConstantBuffer::Instance()->GetConstantBufferType(uniformBufferName);
 
             uint32_t member_count = uniformBufferType.member_types.size();
             for (uint32_t i = 0; i < member_count; i++)
             {
                 auto& memberName = compiler.get_member_name(resource.base_type_id, i);
                 auto& memberType = compiler.get_type(uniformBufferType.member_types[i]);
-                auto memberSize = compiler.get_declared_struct_member_size(uniformBufferType, i);
+                size_t memberSize = compiler.get_declared_struct_member_size(uniformBufferType, i);
+                uint32_t offset = compiler.type_struct_member_offset(uniformBufferType, i);
 
                 paramters.push_back(ShaderParameter{
-                    memberName, 
+                    memberName,
                     SPIRTypeToShaderParameterType(memberType, memberSize),
-                    binding });
-                printf("member : %s\n", memberName.c_str());
+                    offset });
+                printf("member : %s, offset : %d\n", memberName.c_str(), offset);
             }
 
-            //shaderModule->count++
+            VkConstantBuffer* cb = new VkConstantBuffer(uniformBufferSize, uniformBufferName, binding, cbType);
+            cbs.push_back(cb);
+
+            VkDescriptorSetLayoutBinding uboLayoutBinding{};
+            uboLayoutBinding.binding = binding;
+            uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            // buffer array length
+            uboLayoutBinding.descriptorCount = 1;
+            uboLayoutBinding.stageFlags = stageFlags;
+            uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+
+            descriptorSetLayoutBindings.push_back(uboLayoutBinding);
         }
 
         for (auto& resource : resources.storage_buffers)
@@ -176,7 +195,16 @@ namespace Palette
         // todo get spirv_cross::ShaderResources
         try 
         {
-            GetShaderResourcesInfo(vert_spirv, this);
+            std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings{};
+            GetShaderResourcesInfo(vert_spirv, descriptorSetLayoutBindings, this, VK_SHADER_STAGE_VERTEX_BIT);
+            GetShaderResourcesInfo(frag_spirv, descriptorSetLayoutBindings, this, VK_SHADER_STAGE_FRAGMENT_BIT);
+
+            VkDescriptorSetLayoutCreateInfo layoutInfo{};
+            layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+            layoutInfo.bindingCount = descriptorSetLayoutBindings.size();
+            layoutInfo.pBindings = descriptorSetLayoutBindings.data();
+
+            VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &m_DescriptorSetLayout))
         }
         catch (const spirv_cross::CompilerError& e) 
         {
@@ -203,11 +231,6 @@ namespace Palette
         m_ShaderStages[1] = fragShaderStageInfo;
     }
 
-    ComputeShaderModule::~ComputeShaderModule()
-    {
-
-    }
-
     ComputeShaderModule::ComputeShaderModule(const std::string& path, const std::string& name)
         : IShaderModuleResourse()
     {
@@ -224,12 +247,12 @@ namespace Palette
         
     }
 
-    const std::string ShaderResource::DEFUALTSHADERPATH = "triangle.shader";
+    const std::string ShaderResource::DEFAULTSHADERPATH = "triangle.shader";
     Shader ShaderResource::defaultShader = nullptr;
 
     ShaderResource::~ShaderResource()
     {
-        vkDestroyPipeline(PaletteGlobal::device, m_Pipeline, nullptr);
+        vkDestroyPipeline(device, m_Pipeline, nullptr);
     }
 
     ShaderResource::ShaderResource(const std::string& path)
@@ -243,54 +266,54 @@ namespace Palette
 
         if (ext.compare("shader") == 0)
         {
-            m_Type = ShaderType::VertexFrag;
+            m_Type = ShaderType::vertexFrag;
             try
             {
                 m_ShaderModules = IShaderModule(new VertexFragShaderModule(path, m_Name));
             }
             catch (const std::exception& e)
             {
-                m_Type = ShaderType::None;
+                m_Type = ShaderType::none;
                 printf("can not find the shader file : s% : s%", m_Name.c_str(), e.what());
             }
         }
         else if (ext.compare("compute") == 0)
         {
-            m_Type = ShaderType::Compute;
+            m_Type = ShaderType::compute;
             try
             {
                 m_ShaderModules = IShaderModule(new ComputeShaderModule(path, m_Name));
             }
             catch (const std::exception& e)
             {
-                m_Type = ShaderType::None;
+                m_Type = ShaderType::none;
                 printf("can not find the shader file : s% : s%", m_Name.c_str(), e.what());
             }
         }
         else
         {
-            m_Type = ShaderType::None;
+            m_Type = ShaderType::none;
         }
 
         // tempCode
-        m_PassType = PassType::SimplePass;
+        m_PassType = simplePass;
     }
 
     Shader ShaderResource::GetDefaultShader()
     {
         if (!defaultShader)
         {
-            defaultShader = Shader(new ShaderResource(DEFUALTSHADERPATH));
+            defaultShader = Shader(new ShaderResource(DEFAULTSHADERPATH));
         }
         return defaultShader;
     }
 
     IShaderModule ShaderResource::GetShaderModule()
     {
-        if (m_Type == ShaderType::None)
+        if (m_Type == ShaderType::none)
         {
             auto shader = GetDefaultShader();
-            if (shader->m_Type != ShaderType::None)
+            if (shader->m_Type != ShaderType::none)
                 return shader->GetShaderModule();
             else
                 throw std::runtime_error("defaultShader fails to load");

@@ -9,7 +9,7 @@ namespace Palette
 
 	using MaterialParameterDictionary = std::unordered_map<std::string, MaterialParameterData>;
 
-	Material MaterialResource::DefualtMat = nullptr;
+	Material MaterialResource::DefaultMat = nullptr;
 
 	MaterialResource::MaterialResource()
 	{
@@ -43,17 +43,17 @@ namespace Palette
 		return Material(copyMat);
 	}
 
-	Material MaterialResource::GetDefualtMat()
+	Material MaterialResource::GetDefaultMat()
 	{
-		if (!DefualtMat)
+		if (!DefaultMat)
 		{
-			DefualtMat = Material(new MaterialResource(ShaderResource::GetDefaultShader()));
+			DefaultMat = Material(new MaterialResource(ShaderResource::GetDefaultShader()));
 		}
-		return DefualtMat;
+		return DefaultMat;
 	}
 
-	void MaterialResource::ReleaseDefualtMat()
+	void MaterialResource::ReleaseDefaultMat()
 	{
-		DefualtMat->ReleaseRef();
+		DefaultMat->ReleaseRef();
 	}
 }

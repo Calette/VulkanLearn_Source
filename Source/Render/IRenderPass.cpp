@@ -106,10 +106,17 @@ namespace Palette
 
         // todo
         // 应该还要加各种constant buffer
+        std::vector<VkDescriptorSetLayout> DescriptorSetLayoutList{ shader->GetShaderModule()->GetDescriptorSetLayout() };
+        //auto& elementDescriptorSetList = shader->GetShaderModule()->GetDescriptorSetLayout();
+        //for (auto& descriptorSet : elementDescriptorSetList)
+        //{
+        //    DescriptorSetLayoutList.push_back(descriptorSet->GetDescriptorSetLayout());
+        //}
+
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = 1;
-        pipelineLayoutInfo.pSetLayouts = &GlobalConstantBuffer::Instance()->GetDescriptorSetLayout();
+        pipelineLayoutInfo.setLayoutCount = DescriptorSetLayoutList.size();
+        pipelineLayoutInfo.pSetLayouts = DescriptorSetLayoutList.data();
         pipelineLayoutInfo.pushConstantRangeCount = 0;
 
         VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pass->GetPipelineLayout()))
@@ -211,9 +218,6 @@ namespace Palette
         m_Elements.clear();
         m_Effective = false;
         m_FinalOutput = false;
-        m_DescriptorSets.clear();
-
-        m_DescriptorSets.push_back(GlobalConstantBuffer::Instance()->GetDescriptorSet());
     }
 
     void IRenderPass::Initialize(VkCommandBuffer& cmd)

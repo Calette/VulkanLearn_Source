@@ -27,6 +27,6 @@ namespace Palette
 	{
 		std::string name;
 		ShaderParameterType type;
-		unsigned binding;
+		uint32_t offset;
 	};
 }
