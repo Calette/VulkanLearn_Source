@@ -38,8 +38,8 @@ namespace Palette
 		void SetFinalOutput() noexcept { m_FinalOutput = true; }
 
 		GETD(std::string, Name, "Default Pass")
-		GETD(PassType, PassType, defaultPass)
-		GETD(ConstantBufferType, ConstantBufferType, customConstant)
+		GETD(PassType, PassType, DEFAULT_PASS)
+		GETD(ConstantBufferType, ConstantBufferType, CUSTOM_CONSTANT)
 
 		GET(std::vector<IRenderPass*>, InputNodes)
 

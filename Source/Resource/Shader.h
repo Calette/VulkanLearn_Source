@@ -28,11 +28,11 @@ namespace Palette
 		std::string GetName() const noexcept { return m_Name; }
 		uint32_t PassFlag() const noexcept { return m_PassFlag; }
 		std::vector<ShaderParameter>& GetShaderParameters() noexcept { return m_Parameters; }
-		std::vector<VkConstantBuffer*>& GetConstantBuffers() noexcept { return m_ConstantBuffers; }
+		std::unordered_map<unsigned, std::vector<VkConstantBuffer*>>& GetConstantBuffers() noexcept { return m_ConstantBuffers; }
+		void GetDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets);
+		void GetDescriptorSetLayouts(std::vector<VkDescriptorSetLayout>& descriptorSetLayouts);
 
 		virtual VkPipelineShaderStageCreateInfo* GetShaderStages() = 0;
-
-		GET(VkDescriptorSetLayout, DescriptorSetLayout)
 
 	protected:
 		virtual ~IShaderModuleResourse() = default;
@@ -40,13 +40,18 @@ namespace Palette
 
 		void _CreateShaderModule(VkShaderModule& shaderModule, const std::vector<uint32_t>& code);
 		void _CreateDescriptorSet();
+		void _CreateDescriptorPool();
+
+		GETD(ConstantBufferType, BufferType, CUSTOM_CONSTANT)
 
 	protected:
 		std::string	m_Name;
 		uint32_t	m_PassFlag = 0u;
+		VkDescriptorPool	m_DescriptorPool;
 		std::vector<ShaderParameter>	m_Parameters;
-		std::vector<VkConstantBuffer*>	m_ConstantBuffers;
-		uint32_t	m_ConstantBufferCount;
+		std::unordered_map<unsigned, VkDescriptorSetLayout>	m_DescriptorSetLayouts;
+		std::unordered_map<unsigned, std::vector<VkDescriptorSet>>	m_DescriptorSets;
+		std::unordered_map<unsigned, std::vector<VkConstantBuffer*>>	m_ConstantBuffers;
 	};
 
 	class VertexFragShaderModule : public IShaderModuleResourse
@@ -63,6 +68,7 @@ namespace Palette
 
 		void _CreateShaderInfo(std::vector<std::uint32_t>& vert_spirv, std::vector<std::uint32_t>& frag_spirv);
 		void _CreatePipelineShaderStage();
+		void _SetCommonBuffer();
 
 	protected:
 		std::string m_Vert_SPIR_V_Path;

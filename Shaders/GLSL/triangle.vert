@@ -3,13 +3,13 @@
 
 // #include "test.h"
 
-layout(binding = 0) uniform GlobalUniformBuffer 
+layout(set = 0, binding = 0) uniform GlobalUniformBuffer 
 {
     mat4 view;
     mat4 proj;
 } globalUniformBuffer;
 
-layout(binding = 1) uniform ObjectUniformBuffer 
+layout(set = 1, binding = 0) uniform ObjectUniformBuffer 
 {
     mat4 model;
 } objectUniformBuffer;

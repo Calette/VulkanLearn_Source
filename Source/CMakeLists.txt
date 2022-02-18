@@ -5,7 +5,7 @@ project(Engine)
 # Property
 set(CMAKE_CXX_STANDARD 17)
 
-# 母目录
+# 父目录
 string(REGEX REPLACE "(.*)/(.*)" "\\1" PROJECT_INIT_PATH  ${PROJECT_SOURCE_DIR})
 # Common
 include_directories(${PROJECT_INIT_PATH}/Include)
@@ -48,11 +48,12 @@ file(GLOB_RECURSE project_cpps *.cpp *.c)
 set(all_files ${project_headers} ${project_cpps})
 source_group_by_dir(all_files)
 
+# 生成可执行文件
 add_executable(${PROJECT_NAME} ${all_files})
 
+# target_link_libraries需要写在add_executable后
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Vulkan_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBS})
-
 #message(STATUS "!!!! ${CMAKE_BINARY_DIR}/third_party/glslang/SPIRV/Debug/SPIRVd.lib")
 target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/third_party/Debug/glslang-default-resource-limits.lib)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/third_party/glslang/SPIRV/Debug/SPIRVd.lib)

@@ -104,14 +104,8 @@ namespace Palette
         colorBlending.blendConstants[2] = 0.0f;
         colorBlending.blendConstants[3] = 0.0f;
 
-        // todo
-        // 应该还要加各种constant buffer
-        std::vector<VkDescriptorSetLayout> DescriptorSetLayoutList{ shader->GetShaderModule()->GetDescriptorSetLayout() };
-        //auto& elementDescriptorSetList = shader->GetShaderModule()->GetDescriptorSetLayout();
-        //for (auto& descriptorSet : elementDescriptorSetList)
-        //{
-        //    DescriptorSetLayoutList.push_back(descriptorSet->GetDescriptorSetLayout());
-        //}
+        std::vector<VkDescriptorSetLayout> DescriptorSetLayoutList{};
+        shader->GetShaderModule()->GetDescriptorSetLayouts(DescriptorSetLayoutList);
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

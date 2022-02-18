@@ -7,30 +7,44 @@ namespace Palette
 	{
 		vertexFrag,
 		compute,
-		none
+		errorShader
 	};
 
 	enum PassType
 	{
-		defaultPass = 1,
-		simplePass = 2
+		DEFAULT_PASS = 1,
+		SIMPLE_PASS = 2
 	};
 
 	enum ConstantBufferType
 	{
-		customConstant = 0,
-		globalConstant = 1
+		CUSTOM_CONSTANT = 0,
+		GLOBAL_CONSTANT = 1,
 	};
 
 	struct ConstantBuffer
 	{
-
+		virtual ~ConstantBuffer() = default;
+		virtual VkDeviceSize GetSize() = 0;
+		virtual void* GetData() = 0;
 	};
 
 	struct GlobalConstant : public ConstantBuffer
 	{
+		VkDeviceSize GetSize() override { return sizeof(GlobalConstant) - sizeof(void*); };
+		void* GetData() override { return &view; };
 		//glm::mat4 model;
 		glm::mat4 view;
 		glm::mat4 proj;
+	};
+
+	struct CustomConstant : public ConstantBuffer
+	{
+		CustomConstant(VkDeviceSize size) : size(size) {}
+		VkDeviceSize GetSize() override { return size; };
+		void* GetData() override { return data; };
+	private:
+		VkDeviceSize size;
+		void* data;
 	};
 }

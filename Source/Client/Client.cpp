@@ -2,6 +2,7 @@
 #include "Client.h"
 #include "Common/Guid.h"
 #include "Render/Shader/ConstantBuffer.h"
+#include "Common/Time.h"
 
 namespace Palette
 {
@@ -13,6 +14,7 @@ namespace Palette
 
 		world = new World();
 		world->Initialize();
+		Time::Instance()->Initial();
 	}
 
 	Client::~Client()
@@ -22,10 +24,12 @@ namespace Palette
 		MaterialResource::ReleaseDefaultMat();
 		RenderElement::PreRenderShader->ReleaseRef();
 		ShaderResource::GetDefaultShader()->ReleaseRef();
+		GlobalConstantBuffer::Instance()->ReleaseGlobalConstant();
 	}
 
 	void Client::Update_ot()
 	{
+		Time::Instance()->Update();
 		world->Update_ot();
 		GlobalConstantBuffer::Instance()->UpdateUniformBuffer();
 	}

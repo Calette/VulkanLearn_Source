@@ -15,7 +15,7 @@ namespace Palette
 		{
 			switch (shader->GetPassType())
 			{
-			case simplePass:
+			case SIMPLE_PASS:
 				//PaletteGlobal::client->GetRenderPipeline()
 				break;
 			default:
@@ -41,9 +41,14 @@ namespace Palette
 			}
 
 			auto& elementDescriptorSetList = shader->GetShaderModule()->GetConstantBuffers();
-			for (auto& descriptorSet : elementDescriptorSetList)
+
+			for (auto& iter : elementDescriptorSetList)
 			{
-				descriptorSet->UpdateUniformBuffer();
+				for (auto buffer : iter.second)
+				{
+					if (buffer->GetType() == CUSTOM_CONSTANT)
+						buffer->UpdateUniformBuffer();
+				}
 			}
 		}
 		return true;
@@ -68,11 +73,7 @@ namespace Palette
 				vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
 				std::vector<VkDescriptorSet> descriptorSetList{};
-				auto& elementDescriptorSetList = shader->GetShaderModule()->GetConstantBuffers();
-				for(auto& descriptorSet : elementDescriptorSetList)
-				{
-					descriptorSetList.push_back(descriptorSet->GetDescriptorSet());
-				}
+				shader->GetShaderModule()->GetDescriptorSets(descriptorSetList);
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pass->GetPipelineLayout(), 0, descriptorSetList.size(), descriptorSetList.data(), 0, nullptr);
 
 				uint32_t indexDataSize = static_cast<uint32_t>(element->Mesh->GetIndexData().size());

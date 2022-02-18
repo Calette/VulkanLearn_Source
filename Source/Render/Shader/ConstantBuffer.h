@@ -21,26 +21,24 @@ namespace Palette
 	{
 	public:
 		VkConstantBuffer() = default;
-		virtual ~VkConstantBuffer();
-		VkConstantBuffer(uint64_t bufferSize, std::string name, unsigned binding, ConstantBufferType type);
+		~VkConstantBuffer();
+		VkConstantBuffer(VkDeviceSize bufferSize, std::string name, unsigned set, unsigned binding, ConstantBufferType type);
 
-		VkDescriptorSet& GetDescriptorSet();
-		virtual void UpdateUniformBuffer();
-		void CreateDescriptorSet(VkDescriptorSetLayout descriptorSetLayout);
+		void UpdateUniformBuffer();
+		void CreateDescriptorSet(std::vector<VkDescriptorSet>& descriptorSets);
+		void SetData(uint32_t offset, void* data, size_t size);
 
 		GET(std::string, Name)
+		GET(unsigned, Set)
 		GET(unsigned, Binding)
-		GET(uint64_t, BufferSize)
+		GET(VkDeviceSize, BufferSize)
 		GET(ConstantBufferType, Type)
+		GETP(ConstantBuffer, ConstantBuffer)
 
 	protected:
 		void _CreateUniformBuffers();
-		void _CreateDescriptorPool();
 
 	protected:
-		VkDescriptorPool m_DescriptorPool;
-		std::vector<VkDescriptorSet> m_DescriptorSets;
-
 		std::vector<VkBuffer>		m_UniformBuffers;
 		std::vector<VkDeviceMemory>	m_UniformBuffersMemory;
 	};
@@ -51,13 +49,17 @@ namespace Palette
 		GlobalConstantBuffer();
 		~GlobalConstantBuffer() = default;
 
-		ConstantBuffer GetGlobalConstantBuffer(ConstantBufferType cbtype);
-
+		void ReleaseGlobalConstant();
 		ConstantBufferType GetConstantBufferType(const std::string& name);
 
 		void UpdateUniformBuffer();
 
-	private:
-		GlobalConstant m_GlobalConstant;
+		GETP(VkConstantBuffer, GlobalConstant)
+		GET(unsigned, Set)
+		GET(VkDescriptorSetLayout, DescriptorSetLayout)
+		GET(std::vector<VkDescriptorSet>, DescriptorSets)
+
+	protected:
+		VkDescriptorPool	m_DescriptorPool;
 	};
 }
