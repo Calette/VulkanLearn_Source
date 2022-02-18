@@ -40,7 +40,7 @@ namespace Palette
 
 	struct CustomConstant : public ConstantBuffer
 	{
-		CustomConstant(VkDeviceSize size) : size(size) {}
+		CustomConstant(VkDeviceSize size) : size(size) { data = malloc(size); }
 		VkDeviceSize GetSize() override { return size; };
 		void* GetData() override { return data; };
 	private:

@@ -3,6 +3,7 @@
 #include "Resourse.h"
 #include "Render/Shader/ConstantBuffer.h"
 #include "Render/Shader/ShaderParameter.h"
+#include "Common/Math/Vector.h"
 
 namespace Palette
 {
@@ -41,6 +42,12 @@ namespace Palette
 		static Material GetDefaultMat();
 		static void ReleaseDefaultMat();
 
+		SETMATPARAM(Float, float, ShaderParameterType::Float)
+		SETMATPARAM(Int, uint64_t, ShaderParameterType::Integer)
+		SETMATPARAM(Vector, Vector3, ShaderParameterType::Vector3)
+		SETMATPARAM(Vector, Vector4, ShaderParameterType::Vector4)
+		SETMATPARAM(Matrix4, glm::mat4, ShaderParameterType::Matrix4x4)
+
 	protected:
 		static Material	DefaultMat;
 		BlendMode		m_BlendMode;
@@ -55,6 +62,6 @@ namespace Palette
 		//	}
 		//};
 		//std::unordered_map<Shader, VkConstantBuffer*, KeyHasher>	m_DescriptorSets;
-		std::vector<MaterialParameter>							m_Parameters;
+		std::unordered_map<std::string, MaterialParameter>	m_Parameters;
 	};
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include "IComponent.h"
-#include "Common/Math/Vecter.h"
+#include "Common/Math/Vector.h"
 
 namespace Palette
 {
@@ -8,9 +8,9 @@ namespace Palette
 	{
 	public:
 		TransformComponent(IObject* parent = nullptr);
-		//void Update_ot();
+		//void Update_ot() override;
 
 	protected:
-		Vecter3 position;
+		Vector3 position;
 	};
 }

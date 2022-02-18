@@ -2,7 +2,7 @@
 
 namespace Palette
 {
-	struct Vecter4
+	struct Vector4
 	{
 	public:
 		float x;
@@ -10,26 +10,26 @@ namespace Palette
 		float z;
 		float w;
 
-		Vecter4(float xx, float yy, float zz, float ww)
+		Vector4(float xx, float yy, float zz, float ww)
 		{
 			x = xx; y = yy; z = zz; w = ww;
 		};
 
-		static Vecter4 Zero;
+		static Vector4 Zero;
 	};
 
-	struct Vecter3
+	struct Vector3
 	{
 	public:
 		float x;
 		float y;
 		float z;
 
-		Vecter3(float xx, float yy, float zz) 
+		Vector3(float xx, float yy, float zz) 
 		{
 			x = xx; y = yy; z = zz;
 		};
 
-		static Vecter3 Zero;
+		static Vector3 Zero;
 	};
 }

@@ -54,8 +54,8 @@ namespace Palette
 
 		void UpdateUniformBuffer();
 
-		GETP(VkConstantBuffer, GlobalConstant)
 		GET(unsigned, Set)
+		GETP(VkConstantBuffer, GlobalConstant)
 		GET(VkDescriptorSetLayout, DescriptorSetLayout)
 		GET(std::vector<VkDescriptorSet>, DescriptorSets)
 

@@ -8,6 +8,7 @@ namespace Palette
 	struct RenderElement
 	{
 		static Shader PreRenderShader;
+		static void ReleasePreRenderShader();
 		RenderMesh Mesh;
 		Material Mat;
 	};

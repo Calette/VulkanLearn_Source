@@ -1,12 +1,12 @@
 #pragma once
 #include "Common/IObject.h"
-#include "Common/Math/Vecter.h"
+#include "Common/Math/Vector.h"
 
 namespace Palette
 {
 	struct SaveCamPos
 	{
-		Vecter3 position;
+		Vector3 position;
 
 	};
 

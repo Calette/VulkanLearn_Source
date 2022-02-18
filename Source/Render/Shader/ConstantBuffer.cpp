@@ -36,21 +36,9 @@ namespace Palette
 
 	void VkConstantBuffer::UpdateUniformBuffer()
 	{
-		void* cb;
-		VkDeviceSize size;
-		switch (m_Type)
-		{
-		case GLOBAL_CONSTANT:
-			size = m_ConstantBuffer->GetSize();
-			cb = m_ConstantBuffer->GetData();
-			break;
-		default:
-			glm::mat4 model = glm::rotate(glm::mat4(1.0f), Time::Instance()->GetTime() * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			size = sizeof(model);
-			cb = &model;
-			break;
-		}
-
+		VkDeviceSize size = m_ConstantBuffer->GetSize();
+		void* cb = m_ConstantBuffer->GetData();
+			
 		uint32_t index = PaletteGlobal::vulkanDevice->GetImageIndex();
 		void* data;
 		VK_CHECK_RESULT(vkMapMemory(device, m_UniformBuffersMemory[index], 0, size, 0, &data));
@@ -114,7 +102,7 @@ namespace Palette
 		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		// buffer array length
 		uboLayoutBinding.descriptorCount = 1;
-		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		//uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
 
 		VkDescriptorSetLayoutCreateInfo layoutInfo{};

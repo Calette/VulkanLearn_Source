@@ -37,10 +37,15 @@ namespace Palette
 	Material MaterialResource::Copy()
 	{
 		MaterialResource* copyMat = new MaterialResource();
-		copyMat->m_Shaders = m_Shaders;
+		// todo
+		//copyMat->m_Shaders = m_Shaders;
 		copyMat->m_BlendMode = m_BlendMode;
 		copyMat->m_Parameters = m_Parameters;
 		return Material(copyMat);
+		for (auto shader : m_Shaders)														
+		{																					
+			shader->SetFloat("aaa", 1.0f);												
+		}
 	}
 
 	Material MaterialResource::GetDefaultMat()

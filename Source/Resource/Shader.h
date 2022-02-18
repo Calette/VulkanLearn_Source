@@ -13,6 +13,8 @@
 #include "Render/Mesh/VertexInputBindingDescription.h"
 #include "Render/Shader/ConstantBuffer.h"
 #include "Common/PaletteCommon.h"
+#include "Render/Shader/ShaderCommon.h"
+#include "Common/Math/Vector.h"
 
 namespace Palette
 {
@@ -27,7 +29,6 @@ namespace Palette
 	public:
 		std::string GetName() const noexcept { return m_Name; }
 		uint32_t PassFlag() const noexcept { return m_PassFlag; }
-		std::vector<ShaderParameter>& GetShaderParameters() noexcept { return m_Parameters; }
 		std::unordered_map<unsigned, std::vector<VkConstantBuffer*>>& GetConstantBuffers() noexcept { return m_ConstantBuffers; }
 		void GetDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets);
 		void GetDescriptorSetLayouts(std::vector<VkDescriptorSetLayout>& descriptorSetLayouts);
@@ -41,16 +42,18 @@ namespace Palette
 		void _CreateShaderModule(VkShaderModule& shaderModule, const std::vector<uint32_t>& code);
 		void _CreateDescriptorSet();
 		void _CreateDescriptorPool();
+		void _SetParamters();
 
 		GETD(ConstantBufferType, BufferType, CUSTOM_CONSTANT)
+		GETP(ShaderResource, Shader)
 
 	protected:
-		std::string	m_Name;
-		uint32_t	m_PassFlag = 0u;
+		std::string			m_Name;
+		uint32_t			m_PassFlag = 0u;
 		VkDescriptorPool	m_DescriptorPool;
-		std::vector<ShaderParameter>	m_Parameters;
-		std::unordered_map<unsigned, VkDescriptorSetLayout>	m_DescriptorSetLayouts;
-		std::unordered_map<unsigned, std::vector<VkDescriptorSet>>	m_DescriptorSets;
+
+		std::unordered_map<unsigned, VkDescriptorSetLayout>				m_DescriptorSetLayouts;
+		std::unordered_map<unsigned, std::vector<VkDescriptorSet>>		m_DescriptorSets;
 		std::unordered_map<unsigned, std::vector<VkConstantBuffer*>>	m_ConstantBuffers;
 	};
 
@@ -64,7 +67,7 @@ namespace Palette
 		VkPipelineShaderStageCreateInfo* GetShaderStages() override { return m_ShaderStages; }
 
 	protected:
-		VertexFragShaderModule(const std::string& path, const std::string& name);
+		VertexFragShaderModule(const std::string& path, const std::string& name, ShaderResource* shader);
 
 		void _CreateShaderInfo(std::vector<std::uint32_t>& vert_spirv, std::vector<std::uint32_t>& frag_spirv);
 		void _CreatePipelineShaderStage();
@@ -91,7 +94,7 @@ namespace Palette
 
 	protected:
 		~ComputeShaderModule() override = default;
-		ComputeShaderModule(const std::string& path, const std::string& name);
+		ComputeShaderModule(const std::string& path, const std::string& name, ShaderResource* shader);
 
 		void _CreatePipelineShaderStage(VkShaderModule computeShaderModule);
 
@@ -107,6 +110,7 @@ namespace Palette
 		ShaderResource(const std::string& path);
 
 		static Shader GetDefaultShader();
+		static void ReleaseDefaultShader();
 
 		IShaderModule GetShaderModule();
 
@@ -124,6 +128,15 @@ namespace Palette
 
 		void RealeaseShaderModule();
 
+		SETSHADERPARAM(Float, float)
+		SETSHADERPARAM(Vector, Vector4)
+		SETSHADERPARAM(Vector, Vector3)
+		SETSHADERPARAM(Int, uint64_t)
+		SETSHADERPARAM(Matrix4, glm::mat4)
+
+		typedef std::unordered_map<std::string, ShaderParameter> map_string_ShaderParameter;
+		GET(map_string_ShaderParameter, Parameters)
+
 	protected:
 		void _ReloadShader(uint32_t newTimeStamp);
 
@@ -133,6 +146,7 @@ namespace Palette
 		IShaderModule					m_ShaderModules;
 
 		static const std::string		DEFAULTSHADERPATH;
+	public:
 		static Shader					defaultShader;
 
 		bool							m_HasPipeline	= false;

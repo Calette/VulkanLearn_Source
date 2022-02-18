@@ -4,7 +4,7 @@ namespace Palette
 {
 	TransformComponent::TransformComponent(IObject* parent)
 		: IComponent(parent)
-		, position(Vecter3::Zero)
+		, position(Vector3::Zero)
 	{
 		
 	}

@@ -7,6 +7,11 @@ namespace Palette
 {
 	Shader RenderElement::PreRenderShader = nullptr;
 
+	void RenderElement::ReleasePreRenderShader()
+	{
+		PreRenderShader = nullptr;
+	}
+
 	void DrawMesh(RenderMesh mesh, Material mat)
 	{
 		// todo

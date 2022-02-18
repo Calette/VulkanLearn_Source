@@ -1,5 +1,6 @@
 #pragma once
 #include "Common/IObject.h"
+#include "Common/Time.h"
 #include <vector>
 
 namespace Palette

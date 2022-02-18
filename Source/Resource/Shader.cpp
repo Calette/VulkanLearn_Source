@@ -72,6 +72,25 @@ namespace Palette
 		}
 	}
 
+	void IShaderModuleResourse::_SetParamters()
+	{
+		auto& Parameters = m_Shader->GetParameters();
+		for (auto& iter : Parameters)
+		{
+			auto& param = iter.second;
+			//printf("%d %d", &m_Shader->m_Parameters["model"], &paramIter);
+			// tempCode
+			VkConstantBuffer* buffer = m_ConstantBuffers[param.set][param.binding];
+			if (buffer->GetType() == CUSTOM_CONSTANT)
+			{
+				CustomConstant* cb = dynamic_cast<CustomConstant*>(buffer->GetConstantBuffer());
+				param.targetData = (char*)cb->GetData() + param.offset;
+				// todo default value
+				memset(param.targetData, 0, param.size / sizeof(int));
+			}
+		}
+	}
+
 	void IShaderModuleResourse::_CreateDescriptorPool()
 	{
 		uint32_t size = PaletteGlobal::vulkanDevice->GetImageCount();
@@ -147,15 +166,16 @@ namespace Palette
 		buffer_frag = std::vector<char>(str.begin(), str.end());
 	}
 
-	VertexFragShaderModule::VertexFragShaderModule(const std::string& path, const std::string& name)
-		: IShaderModuleResourse()
+	VertexFragShaderModule::VertexFragShaderModule(const std::string& path, const std::string& name, ShaderResource* shader)
 	{
+		m_Shader = shader;
+
 		std::string m_Vert_GLSL_Path = GetShaderPath() + "Shaders/GLSL/" + name + ".vert";
 		std::string m_Frag_GLSL_Path = GetShaderPath() + "Shaders/GLSL/" + name + ".frag";
 
 		m_GLSL_Path = GetShaderPath() + "Shaders/GLSL/" + name + ".shader";
 
-		// todo
+		// todo parse
 		////auto buffer = ReadFile(m_GLSL_Path);
 		//Parse(buffer, buffer_vert, buffer_frag);
 
@@ -183,6 +203,8 @@ namespace Palette
 		_CreateDescriptorSet();
 
 		_SetCommonBuffer();
+
+		_SetParamters();
 	}
 
 	static ShaderParameterType SPIRTypeToShaderParameterType(spirv_cross::SPIRType spirType, size_t size)
@@ -222,7 +244,7 @@ namespace Palette
 		// The SPIR-V is now parsed, and we can perform reflection on it.
 		spirv_cross::ShaderResources resources = compiler.get_shader_resources();
 
-		auto& paramters = shaderModule->GetShaderParameters();
+		auto& paramters = shaderModule->GetShader()->GetParameters();
 		auto& cbs = shaderModule->GetConstantBuffers();
 		auto& bufferType = shaderModule->GetBufferType();
 
@@ -249,25 +271,8 @@ namespace Palette
 			spirv_cross::SPIRType uniformBufferType = compiler.get_type(resource.type_id);
 			size_t uniformBufferSize = compiler.get_declared_struct_size(uniformBufferType);
 			printf("[(set)%d][(bind)%d]uniform_buffers : %s, size : %d\n", set, binding, uniformBufferName.c_str(), uniformBufferSize);
-			unsigned uniformBufferStructSize = compiler.get_declared_struct_size(uniformBufferType);
 
 			auto cbType = GlobalConstantBuffer::Instance()->GetConstantBufferType(uniformBufferName);
-
-			uint32_t member_count = uniformBufferType.member_types.size();
-			for (uint32_t i = 0; i < member_count; i++)
-			{
-				auto& memberName = compiler.get_member_name(resource.base_type_id, i);
-				auto& memberType = compiler.get_type(uniformBufferType.member_types[i]);
-				size_t memberSize = compiler.get_declared_struct_member_size(uniformBufferType, i);
-				uint32_t offset = compiler.type_struct_member_offset(uniformBufferType, i);
-
-				paramters.push_back(ShaderParameter{
-					memberName,
-					SPIRTypeToShaderParameterType(memberType, memberSize),
-					offset });
-				printf("member : %s, offset : %d\n", memberName.c_str(), offset);
-			}
-
 			VkConstantBuffer* cb = new VkConstantBuffer(uniformBufferSize, uniformBufferName, set, binding, cbType);
 			auto cbIter = cbs.find(set);
 			if (cbIter == cbs.end())
@@ -288,6 +293,26 @@ namespace Palette
 				descriptorSetLayoutBindings.emplace(set, std::vector<VkDescriptorSetLayoutBinding>{uboLayoutBinding});
 			else
 				layoutIter->second.push_back(uboLayoutBinding);
+
+			uint32_t member_count = uniformBufferType.member_types.size();
+			for (uint32_t i = 0; i < member_count; i++)
+			{
+				auto& memberName = compiler.get_member_name(resource.base_type_id, i);
+				auto& memberType = compiler.get_type(uniformBufferType.member_types[i]);
+				size_t memberSize = compiler.get_declared_struct_member_size(uniformBufferType, i);
+				uint32_t offset = compiler.type_struct_member_offset(uniformBufferType, i);
+
+				paramters.emplace(memberName, ShaderParameter{
+					memberName,
+					SPIRTypeToShaderParameterType(memberType, memberSize),
+					set,
+					binding,
+					offset,
+					memberSize,
+					malloc(memberSize),
+					nullptr });
+				printf("member : %s, offset : %d\n", memberName.c_str(), offset);
+			}
 		}
 
 		for (auto& resource : resources.storage_buffers)
@@ -355,7 +380,7 @@ namespace Palette
 		m_ShaderStages[1] = fragShaderStageInfo;
 	}
 
-	ComputeShaderModule::ComputeShaderModule(const std::string& path, const std::string& name)
+	ComputeShaderModule::ComputeShaderModule(const std::string& path, const std::string& name, ShaderResource* shader)
 		: IShaderModuleResourse()
 	{
 
@@ -393,7 +418,7 @@ namespace Palette
 			m_Type = ShaderType::vertexFrag;
 			try
 			{
-				m_ShaderModules = IShaderModule(new VertexFragShaderModule(path, m_Name));
+				m_ShaderModules = IShaderModule(new VertexFragShaderModule(path, m_Name, this));
 			}
 			catch (const std::exception& e)
 			{
@@ -406,7 +431,7 @@ namespace Palette
 			m_Type = ShaderType::compute;
 			try
 			{
-				m_ShaderModules = IShaderModule(new ComputeShaderModule(path, m_Name));
+				m_ShaderModules = IShaderModule(new ComputeShaderModule(path, m_Name, this));
 			}
 			catch (const std::exception& e)
 			{
@@ -430,6 +455,11 @@ namespace Palette
 			defaultShader = Shader(new ShaderResource(DEFAULTSHADERPATH));
 		}
 		return defaultShader;
+	}
+
+	void ShaderResource::ReleaseDefaultShader()
+	{
+		defaultShader = nullptr;
 	}
 
 	IShaderModule ShaderResource::GetShaderModule()

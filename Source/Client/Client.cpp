@@ -22,8 +22,8 @@ namespace Palette
 		delete renderPipeline;
 		delete world;
 		MaterialResource::ReleaseDefaultMat();
-		RenderElement::PreRenderShader->ReleaseRef();
-		ShaderResource::GetDefaultShader()->ReleaseRef();
+		RenderElement::ReleasePreRenderShader();
+		ShaderResource::ReleaseDefaultShader();
 		GlobalConstantBuffer::Instance()->ReleaseGlobalConstant();
 	}
 
