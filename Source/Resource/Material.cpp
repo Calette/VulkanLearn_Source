@@ -18,7 +18,10 @@ namespace Palette
 
 	MaterialResource::~MaterialResource()
 	{
-		
+		for(auto param : m_Parameters)
+		{
+			free(param.second.data);
+		}
 	}
 
 	void MaterialResource::OnRefDestroy()
@@ -42,10 +45,6 @@ namespace Palette
 		copyMat->m_BlendMode = m_BlendMode;
 		copyMat->m_Parameters = m_Parameters;
 		return Material(copyMat);
-		for (auto shader : m_Shaders)														
-		{																					
-			shader->SetFloat("aaa", 1.0f);												
-		}
 	}
 
 	Material MaterialResource::GetDefaultMat()

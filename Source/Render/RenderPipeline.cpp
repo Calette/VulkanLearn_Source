@@ -21,6 +21,7 @@ namespace Palette
 	{
 		RenderElement::PreRenderShader = nullptr;
 		mainScene->Reset();
+		// todo foreach
 		simplePass.Update_rt();
 	}
 

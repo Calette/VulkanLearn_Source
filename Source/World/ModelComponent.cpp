@@ -1,5 +1,6 @@
 #include "ModelComponent.h"
 #include "Render/RenderScene.h"
+#include <typeinfo>
 
 namespace Palette
 {

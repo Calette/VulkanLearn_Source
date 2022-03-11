@@ -49,7 +49,6 @@ namespace Palette
 
 		GET(VkRenderPass, RenderPass)
 		GET(VkRenderPassBeginInfo, RenderPassBeginInfo)
-		GET(VkPipelineLayout, PipelineLayout)
 
 	protected:
 		bool							m_Effective		= false;

@@ -36,27 +36,21 @@ namespace Palette
 
 	void VkConstantBuffer::UpdateUniformBuffer()
 	{
-		VkDeviceSize size = m_ConstantBuffer->GetSize();
 		void* cb = m_ConstantBuffer->GetData();
 			
 		uint32_t index = PaletteGlobal::vulkanDevice->GetImageIndex();
 		void* data;
-		VK_CHECK_RESULT(vkMapMemory(device, m_UniformBuffersMemory[index], 0, size, 0, &data));
-		memcpy(data, cb, size);
+		VK_CHECK_RESULT(vkMapMemory(device, m_UniformBuffersMemory[index], 0, m_BufferSize, 0, &data));
+		memcpy(data, cb, m_BufferSize);
 		vkUnmapMemory(device, m_UniformBuffersMemory[index]);
 	}
 
 	void VkConstantBuffer::_CreateUniformBuffers()
 	{
 		size_t size = PaletteGlobal::vulkanDevice->GetImageCount();
-		auto& uniformBuffers = m_UniformBuffers;
-		auto& uniformBuffersMemory = m_UniformBuffersMemory;
-		uniformBuffers.resize(size);
-		uniformBuffersMemory.resize(size);
-
 		for (size_t i = 0; i < size; i++)
 		{
-			CreateBuffer(m_BufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+			CreateBuffer(m_BufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_UniformBuffers[i], m_UniformBuffersMemory[i]);
 		}
 	}
 

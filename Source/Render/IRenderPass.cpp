@@ -28,13 +28,13 @@ namespace Palette
         subpass.colorAttachmentCount = 1;
         subpass.pColorAttachments = &colorAttachmentRef;
 
-        VkSubpassDependency dependency{};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.srcAccessMask = 0;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        //VkSubpassDependency dependency{};
+        //dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        //dependency.dstSubpass = 0;
+        //dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        //dependency.srcAccessMask = 0;
+        //dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        //dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
         VkRenderPassCreateInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -42,8 +42,9 @@ namespace Palette
         renderPassInfo.pAttachments = &colorAttachment;
         renderPassInfo.subpassCount = 1;
         renderPassInfo.pSubpasses = &subpass;
-        renderPassInfo.dependencyCount = 1;
-        renderPassInfo.pDependencies = &dependency;
+        // todo 据说有问题，subpass只有一个的时候建议先空着
+        //renderPassInfo.dependencyCount = 1;
+        //renderPassInfo.pDependencies = &dependency;
 
         VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass))
     }
@@ -113,7 +114,7 @@ namespace Palette
         pipelineLayoutInfo.pSetLayouts = DescriptorSetLayoutList.data();
         pipelineLayoutInfo.pushConstantRangeCount = 0;
 
-        VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pass->GetPipelineLayout()))
+        VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &shader->GetPipelineLayout()))
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
@@ -147,7 +148,7 @@ namespace Palette
         //pipelineInfo.pDepthStencilState = nullptr; // Optional
         pipelineInfo.pColorBlendState = &colorBlending;
         //pipelineInfo.pDynamicState = nullptr; // Optional
-        pipelineInfo.layout = pass->GetPipelineLayout();
+        pipelineInfo.layout = shader->GetPipelineLayout();
         pipelineInfo.renderPass = pass->GetRenderPass();
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
@@ -199,7 +200,6 @@ namespace Palette
 
     IRenderPass::~IRenderPass()
     {
-        vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr);
         vkDestroyRenderPass(device, m_RenderPass, nullptr);
     }
 

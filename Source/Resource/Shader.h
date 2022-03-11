@@ -18,6 +18,7 @@
 
 namespace Palette
 {
+	class IRenderPass;
 	// 收集缓存没用到的shader变体？
 	class ShaderModuleManager : Singleton<ShaderModuleManager>
 	{
@@ -114,17 +115,9 @@ namespace Palette
 
 		IShaderModule GetShaderModule();
 
-		VkPipeline& GetPipeline() { return m_Pipeline; }
+		void CreatePipeline(IRenderPass* pass);
 
-		std::string& GetName() { return m_Name; }
-
-		std::string& GetSourcePath() { return m_SourcePath; }
-
-		PassType GetPassType() { return m_PassType; }
-
-		bool HasPipeline() { return m_HasPipeline; }
-
-		void FinishCreatePipeline() { m_HasPipeline = true; }
+		void PrepareRendering(IRenderPass* pass);
 
 		void RealeaseShaderModule();
 
@@ -136,23 +129,24 @@ namespace Palette
 
 		typedef std::unordered_map<std::string, ShaderParameter> map_string_ShaderParameter;
 		GET(map_string_ShaderParameter, Parameters)
+		GET(VkPipelineLayout, PipelineLayout)
+		GET(VkPipeline, Pipeline)
+		GET(std::string, Name)
+		GET(std::string, SourcePath)
+		GET(PassType, PassType)
 
 	protected:
 		void _ReloadShader(uint32_t newTimeStamp);
 
 	protected:
-		std::string						m_Name;
 		// different define / passFlag
-		IShaderModule					m_ShaderModules;
+		IShaderModule					m_ShaderModule;
 
 		static const std::string		DEFAULTSHADERPATH;
 	public:
 		static Shader					defaultShader;
 
 		bool							m_HasPipeline	= false;
-		PassType						m_PassType;
-		VkPipeline						m_Pipeline;
-		std::string						m_SourcePath;
 		ShaderType						m_Type;
 		uint32_t						m_TimeStamp;
 		VertexFormat					m_VertexFormat;
