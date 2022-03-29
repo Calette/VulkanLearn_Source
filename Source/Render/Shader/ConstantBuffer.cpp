@@ -48,6 +48,8 @@ namespace Palette
 	void VkConstantBuffer::_CreateUniformBuffers()
 	{
 		size_t size = PaletteGlobal::vulkanDevice->GetImageCount();
+		m_UniformBuffers.resize(size);
+		m_UniformBuffersMemory.resize(size);
 		for (size_t i = 0; i < size; i++)
 		{
 			CreateBuffer(m_BufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_UniformBuffers[i], m_UniformBuffersMemory[i]);

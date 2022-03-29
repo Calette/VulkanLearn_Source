@@ -547,7 +547,7 @@ namespace Palette
 
 		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &m_PipelineLayout))
 
-			VkPipelineVertexInputStateCreateInfo vertexInputInfo {};
+		VkPipelineVertexInputStateCreateInfo vertexInputInfo {};
 		VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
