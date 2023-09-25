@@ -61,18 +61,9 @@ namespace Palette
 			m_DescriptorSets[layoutIter.first].resize(size);
 			VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, m_DescriptorSets[layoutIter.first].data()))
 		}
-
-		for (auto& iter : m_ConstantBuffers)
-		{
-			for (auto buffer : iter.second)
-			{
-				if (buffer->GetType() == CUSTOM_CONSTANT)
-					buffer->CreateDescriptorSet(m_DescriptorSets[iter.first]);
-			}
-		}
 	}
 
-	void IShaderModuleResourse::_SetParamters()
+	void IShaderModuleResourse::_InitParamters()
 	{
 		auto& Parameters = m_Shader->GetParameters();
 		for (auto& iter : Parameters)
@@ -132,9 +123,15 @@ namespace Palette
 
 		vkDestroyDescriptorPool(device, m_DescriptorPool, nullptr);
 
-		for (auto& layoutIter : m_DescriptorSetLayouts)
+		int set = 0;
+		auto layoutIter = m_DescriptorSetLayouts.find(set++);
+		if (m_BufferType & GLOBAL_CONSTANT)
+			layoutIter = m_DescriptorSetLayouts.find(set++);
+
+		while (layoutIter != m_DescriptorSetLayouts.end())
 		{
-			vkDestroyDescriptorSetLayout(device, layoutIter.second, nullptr);
+			vkDestroyDescriptorSetLayout(device, layoutIter->second, nullptr);
+			layoutIter = m_DescriptorSetLayouts.find(set++);
 		}
 
 		for (auto& iter : m_ConstantBuffers)
@@ -201,9 +198,9 @@ namespace Palette
 
 		_CreateDescriptorSet();
 
-		_SetCommonBuffer();
+		_SetConstantBuffer();
 
-		_SetParamters();
+		_InitParamters();
 	}
 
 	static ShaderParameterType SPIRTypeToShaderParameterType(spirv_cross::SPIRType spirType, size_t size)
@@ -246,12 +243,6 @@ namespace Palette
 		auto& paramters = shaderModule->GetShader()->GetParameters();
 		auto& cbs = shaderModule->GetConstantBuffers();
 		auto& bufferType = shaderModule->GetBufferType();
-
-		// Get all sampled images in the shader.
-		for (auto& resource : resources.sampled_images)
-		{
-
-		}
 
 		// Get all Uniform Buffer in the shader
 		for (auto& resource : resources.uniform_buffers)
@@ -319,6 +310,12 @@ namespace Palette
 
 		}
 
+		// Get all sampled images in the shader.
+		for (auto& resource : resources.sampled_images)
+		{
+
+		}
+
 		for (auto& resource : resources.storage_images)
 		{
 
@@ -352,12 +349,21 @@ namespace Palette
 		}
 	}
 
-	void VertexFragShaderModule::_SetCommonBuffer()
+	void VertexFragShaderModule::_SetConstantBuffer()
 	{
 		if (m_BufferType & GLOBAL_CONSTANT)
 		{
 			m_DescriptorSetLayouts.emplace(GlobalConstantBuffer::Instance()->GetSet(), GlobalConstantBuffer::Instance()->GetDescriptorSetLayout());
 			m_DescriptorSets.emplace(GlobalConstantBuffer::Instance()->GetSet(), GlobalConstantBuffer::Instance()->GetDescriptorSets());
+		}
+
+		for (auto& iter : m_ConstantBuffers)
+		{
+			for (auto buffer : iter.second)
+			{
+				if (buffer->GetType() == CUSTOM_CONSTANT)
+					buffer->CreateDescriptorSet(m_DescriptorSets[iter.first]);
+			}
 		}
 	}
 

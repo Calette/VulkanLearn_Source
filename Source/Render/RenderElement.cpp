@@ -60,6 +60,12 @@ namespace Palette
 		{
 			if (shader->GetPassType() & pass->GetPassType())
 			{
+				// 这里绑了DescriptorSetLayouts / (VkVertexInputBindingDescription/std::vector<VkVertexInputAttributeDescription>)
+				// 下面的vkCmdBindDescriptorSets绑定了vkCmdBindDescriptorSets / (vertexBuffers/indexBuffer)
+				// 因此不同材质的shader变体一样，可以绑定同一个VkPipeline
+				// 然后分开vkCmdBindDescriptorSets，顶点信息后Draw
+				
+				// 因此shader是共用的，不共用的是这些buffer
 				if (shader != RenderElement::PreRenderShader)
 				{
 					vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, shader->GetPipeline());
@@ -73,6 +79,8 @@ namespace Palette
 				vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
 				std::vector<VkDescriptorSet> descriptorSetList{};
+				// 接上，因此DescriptorSets应该存在material中，不应该在shader里
+				// 且对于一个material在切换变体时，把shader指向新变体shader，再根据参数数组更新DescriptorSets
 				shader->GetShaderModule()->GetDescriptorSets(descriptorSetList);
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, shader->GetPipelineLayout(), 0, descriptorSetList.size(), descriptorSetList.data(), 0, nullptr);
 

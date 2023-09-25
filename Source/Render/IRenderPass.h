@@ -15,7 +15,7 @@ namespace Palette
 
 	//void CreateDescriptorSetLayout(VkDescriptorSetLayout& descriptorSetLayout);
 	void CreateRenderPass(VkRenderPass& renderPass, const PassInfo& info);
-	void CreatePipeline(IRenderPass* pass, Shader shader);
+	//void CreatePipeline(IRenderPass* pass, Shader shader);
 	void InitFrameBuffer(IRenderPass* renderPass);
 	void BeginRenderPass(IRenderPass* renderPass);
 

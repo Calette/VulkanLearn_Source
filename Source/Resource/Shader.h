@@ -43,7 +43,7 @@ namespace Palette
 		void _CreateShaderModule(VkShaderModule& shaderModule, const std::vector<uint32_t>& code);
 		void _CreateDescriptorSet();
 		void _CreateDescriptorPool();
-		void _SetParamters();
+		void _InitParamters();
 
 		GETD(ConstantBufferType, BufferType, CUSTOM_CONSTANT)
 		GETP(ShaderResource, Shader)
@@ -72,7 +72,7 @@ namespace Palette
 
 		void _CreateShaderInfo(std::vector<std::uint32_t>& vert_spirv, std::vector<std::uint32_t>& frag_spirv);
 		void _CreatePipelineShaderStage();
-		void _SetCommonBuffer();
+		void _SetConstantBuffer();
 
 	protected:
 		std::string m_Vert_SPIR_V_Path;
