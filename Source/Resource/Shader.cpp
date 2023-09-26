@@ -185,7 +185,7 @@ namespace Palette
 
 		// todo cache
 		m_Vert_SPIR_V_Path = GetShaderPath() + "Shaders/SPIR-V/" + name + "_vert.spv";
-		m_Frag_SPIR_V_Path = GetShaderPath() + "Shaders/SPIR-V/" + name + "_frag.spv";
+		m_Frag_SPIR_V_Path = GetShaderPath() + "Shaders/SPIR-V/" + name + "_pixel.spv";
 
 		_CreateShaderModule(m_VertShaderModule, vert_spirv);
 		_CreateShaderModule(m_FragShaderModule, frag_spirv);
@@ -560,7 +560,7 @@ namespace Palette
 		// tempCode
 		VkVertexInputBindingDescription bindingDescription;
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
-		GetVertexInputDescriptions(VertexFormat::VERTEX_P2_C3_U2, bindingDescription, attributeDescriptions);
+		GetVertexInputDescriptions(VertexFormat::VERTEX_P3_C3_U2, bindingDescription, attributeDescriptions);
 
 		vertexInputInfo.vertexBindingDescriptionCount = 0;
 		vertexInputInfo.vertexAttributeDescriptionCount = 0;

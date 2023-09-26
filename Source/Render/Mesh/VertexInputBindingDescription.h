@@ -22,7 +22,7 @@ namespace Palette
 		VERTEX_COMMON_P3_U2 = 0b00101,
 		VERTEX_COMMON_P3_U2_C3 = 0b01101,
 		VERTEX_COMMON = 0b11111,
-		VERTEX_P2_C3_U2
+		VERTEX_P3_C3_U2
 	};
 
 	struct Vertex
@@ -45,13 +45,13 @@ namespace Palette
 		static void GetAttributeDescriptions(std::vector<VkVertexInputAttributeDescription>& attributeDescriptions, VertexFormat vertexFormat);
 	};
 
-	struct Vertex_P2_C3_T2 : public Vertex
+	struct Vertex_P3_C3_T2 : public Vertex
 	{
-		glm::vec2 pos;
+		glm::vec3 pos;
 		glm::vec3 color;
 		glm::vec2 uv;
 
-		Vertex_P2_C3_T2(glm::vec2 p, glm::vec3 c, glm::vec2 t) : pos(p), color(c), uv(t) {}
+		Vertex_P3_C3_T2(glm::vec3 p, glm::vec3 c, glm::vec2 t) : pos(p), color(c), uv(t) {}
 
 		static void GetBindingDescription(VkVertexInputBindingDescription& bindingDescription);
 

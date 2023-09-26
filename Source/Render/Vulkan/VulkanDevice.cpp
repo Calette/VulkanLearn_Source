@@ -164,6 +164,7 @@ namespace Palette
         }
 
         // checking for Validation Layer Support
+        // hook用，重载方法
         if (PaletteGlobal::enableValidationLayers && !_CheckValidationLayerSupport()) 
         {
             throw std::runtime_error("validation layers requested, but not available!");
@@ -171,7 +172,7 @@ namespace Palette
 
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "Hello Triangle";
+        appInfo.pApplicationName = "Hello World";
         appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.pEngineName = "Palette";
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);

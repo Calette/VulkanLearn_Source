@@ -45,6 +45,7 @@ namespace Palette
         }
     }
 
+    // 找到我们需要的QueueFamilies
     QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface)
     {
         QueueFamilyIndices indices;

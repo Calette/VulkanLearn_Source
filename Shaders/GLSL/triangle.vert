@@ -16,14 +16,14 @@ layout(set = 1, binding = 0) uniform ObjectUniformBuffer
 
 // sturct AttributesTest
 // {
-//     vec2 inPosition;
+//     vec3 inPosition;
 //     vec3 inColor;
 //     vec2 inTexCoord;
 // };
 
 // layout(location = 0) in AttributesTest inTest;
 
-layout(location = 0) in vec2 inPosition;
+layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
 layout(location = 2) in vec2 inTexCoord;
 
@@ -37,7 +37,7 @@ vec4 TranslateModelToClip(vec3 position)
 
 void main() 
 {
-    gl_Position = TranslateModelToClip(vec3(inPosition, 0.0));
+    gl_Position = TranslateModelToClip(inPosition);
     fragColor = inColor;
 	fragTexCoord = inTexCoord;
 }
